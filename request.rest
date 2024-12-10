@@ -1,0 +1,25 @@
+### Add a New Post
+POST http://localhost:3000/post
+Content-Type: application/json
+
+{
+  "sender": "Avi",
+  "description": "hello!"
+}
+
+### Get All Posts
+GET http://localhost:3000/posts
+
+### Get a Post by ID
+GET http://localhost:3000/post/1
+
+### Get Posts by Sender
+GET http://localhost:3000/post?sender=Avi
+
+### Update a Post
+PUT http://localhost:3000/post/1
+Content-Type: application/json
+
+{
+  "description": "bye!"
+}
