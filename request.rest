@@ -3,6 +3,7 @@ POST http://localhost:3000/post
 Content-Type: application/json
 
 {
+  "id": 1,
   "sender": "Avi",
   "description": "hello!"
 }
@@ -23,3 +24,40 @@ Content-Type: application/json
 {
   "description": "bye!"
 }
+
+
+//----------------------------------------------->
+
+### Create a Comment (POST)
+POST http://localhost:3000/comment
+Content-Type: application/json
+
+{
+  "id": 1,
+  "sender": "Avi",
+  "message": "hello!",
+  "postId": 1,
+  "creationTime": "timestamp"
+}
+
+### Read a Comment by id (GET)
+GET http://localhost:3000/comment/1
+
+### Update a Comment (POST)
+PUT http://localhost:3000/comment/1
+Content-Type: application/json
+
+{
+  "message": "bye!"
+}
+
+### Delete a Comment (DELETE)
+GET http://localhost:3000/comment/1
+
+### Get All Comments
+GET http://localhost:3000/comments
+
+### Get All Comments by Post
+GET http://localhost:3000/comments?postId=1
+
+
