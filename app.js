@@ -1,31 +1,51 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
-const PORT = 3000;
+const mongoose = require('mongoose');
+const blogSchema = require('./db/dbUtils');
+require('dotenv').config();
 
+const app = express();
 app.use(bodyParser.json());
 
-let posts = [];
-let currentId = 1;
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});
+
+try{
+    mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
+}
+catch (error){
+    console.log('Initial connection error', error);
+}
+
+const db = mongoose.connection;
+db.on('error', error=> console.log(error));
+db.once('open', () => console.log('connected to mongo'))
+
+const Post = mongoose.model('posts', blogSchema);
 
 app.post('/post', (req, res) => {
-    const { sender, description } = req.body;
+    const { title, sender, body } = req.body;
 
-    if (!sender || !description) {
-        return res.status(400).send({ error: 'Provide sender and description' });
+    if (!sender || !title || !body) {
+        return res.status(400).send({ error: 'Provide sender, title and body' });
     }
 
-    const newPost = { id: currentId++, sender, description };
-    posts.push(newPost);
+    const newPost = { title, author: sender, body };
+    Post.create(newPost)
     res.status(201).send(newPost);
 });
 
 app.get('/posts', (req, res) => {
-    res.status(200).send(posts);
+    console.log('--------here');
+    
+    console.log(Post.find());
+    
+    res.status(200).send(JSON.parse(Post.find()));
 });
 
 app.get('/post/:id', (req, res) => {
-    const found = posts.find(post => post.id === parseInt(req.params.id));
+    const found = Post.findById(req.params.id);
 
     if (!found) {
         return res.status(404).send({ error: 'Post not found' });
@@ -65,6 +85,19 @@ app.put('/post/:id', (req, res) => {
     res.status(200).send(postToUpdate);
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+
+
+let comments = [];
+let currentCommentId = 1;
+
+app.post('/comment', (req, res) => {
+    const { sender, message } = req.body;
+
+    if (!sender || !message) {
+        return res.status(400).send({ error: 'Provide sender and message' });
+    }
+
+    const newComment = { id, sender, message, postId: currentCommentId++, creationTime: Date.now() };
+    comments.push(newComment);
+    res.status(201).send(newComment);
 });
