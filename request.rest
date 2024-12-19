@@ -33,15 +33,12 @@ POST http://localhost:3000/comment
 Content-Type: application/json
 
 {
-  "id": 1,
-  "sender": "Avi",
-  "message": "hello!",
-  "postId": 1,
-  "creationTime": "timestamp"
+  "body": "bye!",
+  "postId": "6761c4985718dc2730580f45"
 }
 
 ### Read a Comment by id (GET)
-GET http://localhost:3000/comment/1
+GET http://localhost:3000/comment/
 
 ### Update a Comment (POST)
 PUT http://localhost:3000/comment/1
@@ -58,6 +55,6 @@ GET http://localhost:3000/comment/1
 GET http://localhost:3000/comments
 
 ### Get All Comments by Post
-GET http://localhost:3000/comments?postId=1
+GET http://localhost:3000/comments?postId=6761c4985718dc2730580f45
 
 

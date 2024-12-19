@@ -24,10 +24,14 @@ db.once('open', () => console.log('connected to mongo'))
 
 const Post = mongoose.model('posts', blogSchema);
 
+//POSTS
+//-------------------------------------------------------------------------------->
+
+//working
 app.post('/post', (req, res) => {
     const { title, sender, body } = req.body;
 
-    if (!sender || !title || !body) {
+    if (!title || !sender || !body) {
         return res.status(400).send({ error: 'Provide sender, title and body' });
     }
 
@@ -36,16 +40,16 @@ app.post('/post', (req, res) => {
     res.status(201).send(newPost);
 });
 
-app.get('/posts', (req, res) => {
-    console.log('--------here');
+//working
+app.get('/posts', async (req, res) => {
+    const posts = await Post.find();
     
-    console.log(Post.find());
-    
-    res.status(200).send(JSON.parse(Post.find()));
+    res.status(200).send(posts)
 });
 
-app.get('/post/:id', (req, res) => {
-    const found = Post.findById(req.params.id);
+//working
+app.get('/post/:id', async (req, res) => {
+    const found = await Post.findById(req.params.id);
 
     if (!found) {
         return res.status(404).send({ error: 'Post not found' });
@@ -85,19 +89,52 @@ app.put('/post/:id', (req, res) => {
     res.status(200).send(postToUpdate);
 });
 
+//COMMENTS
+//-------------------------------------------------------------------------------->
 
+//working
+app.post('/comment', async (req, res) => {
+    const { body, postId } = req.body;
 
-let comments = [];
-let currentCommentId = 1;
-
-app.post('/comment', (req, res) => {
-    const { sender, message } = req.body;
-
-    if (!sender || !message) {
-        return res.status(400).send({ error: 'Provide sender and message' });
+    if (!body || !postId) {
+        return res.status(400).send({ error: 'Provide body and postId' });
     }
 
-    const newComment = { id, sender, message, postId: currentCommentId++, creationTime: Date.now() };
-    comments.push(newComment);
-    res.status(201).send(newComment);
+    const currentPost = await Post.findById(postId);
+    const newComment = { body, date: Date.now() };
+    //currentPost.comments.push(newComment)
+    console.log(1, currentPost);
+    
+    currentPost.comments.push(newComment);
+    console.log(2, currentPost);
+
+    Post.findOneAndUpdate(currentPost).catch(error => console.log(error)
+    )
+    console.log(3);
+    
+    res.status(201).send(currentPost);
+});
+
+app.get('/comment/:id', async (req, res) => {
+    const found = await Post.findById({"comments._id": new mongoose.Types.ObjectId(req.params.id)});
+
+    if (!found) {
+        return res.status(404).send({ error: 'Comment not found' });
+    }
+
+    res.status(200).send(found);
+});
+
+app.get('/comments/:postId', async (req, res) => {
+    console.log(2);
+    
+    console.log("check", req.query);
+    
+    const found = await Post.findById(req.query.postId);
+
+    if (!found) {
+        return res.status(404).send({ error: 'Comments by post not found' });
+    }
+
+    res.status(200).send(found);
 });
