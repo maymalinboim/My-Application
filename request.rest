@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "title": "hello",
-  "sender": "May",
+  "sender": "Moriah",
   "body": "shalom!"
 }
 
@@ -12,49 +12,51 @@ Content-Type: application/json
 GET http://localhost:3000/posts
 
 ### Get a Post by ID
-GET http://localhost:3000/post/6761c4985718dc2730580f45
+GET http://localhost:3000/post/6766c478732f3d405570052e
 
 ### Get Posts by Sender
-GET http://localhost:3000/post?sender=Avi
+GET http://localhost:3000/post?sender=Moriah
 
 ### Update a Post
-PUT http://localhost:3000/post/1
+PUT http://localhost:3000/post/6761c4985718dc2730580f45
 Content-Type: application/json
 
 {
-  "description": "bye!"
+  "title": "hi",
+  "body": "byee3!"
 }
 
 
 //----------------------------------------------->
 
-### Create a Comment (POST)
+### Add a Comment
 POST http://localhost:3000/comment
 Content-Type: application/json
 
 {
-  "body": "bye!",
-  "postId": "6761c4985718dc2730580f45"
+  "body": "moriah checking2!",
+  "postId": "6766c478732f3d405570052e"
 }
 
-### Read a Comment by id (GET)
-GET http://localhost:3000/comment/
+### Read a Comment by id
+GET http://localhost:3000/comment/?id=6766c599897130d6767ac175&postId=6766c478732f3d405570052e
 
-### Update a Comment (POST)
-PUT http://localhost:3000/comment/1
+### Update a Comment
+PUT http://localhost:3000/comment/67641bfba7ba8b33f38e101c
 Content-Type: application/json
 
 {
-  "message": "bye!"
+  "postId": "6761c4985718dc2730580f45",
+  "body": "hello22!"
 }
 
-### Delete a Comment (DELETE)
-GET http://localhost:3000/comment/1
+### Delete a Comment
+DELETE http://localhost:3000/comment/?id=67641bfba7ba8b33f38e101c&postId=6761c4985718dc2730580f45
 
 ### Get All Comments
 GET http://localhost:3000/comments
 
 ### Get All Comments by Post
-GET http://localhost:3000/comments?postId=6761c4985718dc2730580f45
+GET http://localhost:3000/comments/6761c4985718dc2730580f45
 
 
