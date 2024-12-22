@@ -1,62 +1,60 @@
 ### Add a New Post
-POST http://localhost:3000/post
+POST http://localhost:3000/posts
 Content-Type: application/json
 
 {
   "title": "hello",
-  "sender": "Moriah",
-  "body": "shalom!"
+  "sender": "May",
+  "body": "hi!"
 }
 
 ### Get All Posts
 GET http://localhost:3000/posts
 
 ### Get a Post by ID
-GET http://localhost:3000/post/6766c478732f3d405570052e
+GET http://localhost:3000/posts/6768612a6997d58a0b2137fb
 
 ### Get Posts by Sender
-GET http://localhost:3000/post?sender=Moriah
+GET http://localhost:3000/posts?sender=May
 
 ### Update a Post
-PUT http://localhost:3000/post/6761c4985718dc2730580f45
+PUT http://localhost:3000/posts/6768612a6997d58a0b2137fb
 Content-Type: application/json
 
 {
   "title": "hi",
-  "body": "byee3!"
+  "body": "bye!!!"
 }
 
 
 //----------------------------------------------->
 
 ### Add a Comment
-POST http://localhost:3000/comment
+POST http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "body": "moriah checking2!",
-  "postId": "6766c478732f3d405570052e"
+  "body": "beautiful!",
+  "postId": "6768612a6997d58a0b2137fb"
 }
 
 ### Read a Comment by id
-GET http://localhost:3000/comment/?id=6766c599897130d6767ac175&postId=6766c478732f3d405570052e
+GET http://localhost:3000/comments?id=676865fc0a454cc548d6fb27&postId=6768612a6997d58a0b2137fb
 
 ### Update a Comment
-PUT http://localhost:3000/comment/67641bfba7ba8b33f38e101c
+PUT http://localhost:3000/comments/676865fc0a454cc548d6fb27
 Content-Type: application/json
 
 {
-  "postId": "6761c4985718dc2730580f45",
-  "body": "hello22!"
+  "postId": "6768612a6997d58a0b2137fb",
+  "body": "nice!"
 }
 
 ### Delete a Comment
-DELETE http://localhost:3000/comment/?id=67641bfba7ba8b33f38e101c&postId=6761c4985718dc2730580f45
+DELETE http://localhost:3000/comments?id=676862e7aae6c4e0a8190681&postId=6768612a6997d58a0b2137fb
 
 ### Get All Comments
 GET http://localhost:3000/comments
 
 ### Get All Comments by Post
-GET http://localhost:3000/comments/6761c4985718dc2730580f45
-
-
+GET http://localhost:3000/comments/6768612a6997d58a0b2137fb
