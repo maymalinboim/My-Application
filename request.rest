@@ -1,60 +1,90 @@
-### Add a New Post
+### Create a New User
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "username": "maychu",
+  "email": "maychu@gmail.com",
+  "password": "123"
+}
+
+### Get All Users
+GET http://localhost:3000/users
+
+### Get User by ID
+GET http://localhost:3000/users/67687dc20cdaa32f405eeda5
+
+### Update User by ID
+PUT http://localhost:3000/users/67687dc20cdaa32f405eeda5
+Content-Type: application/json
+
+{
+  "username": "maychu1",
+  "email": "maychu1@gmail.com",
+  "password": "1234"
+}
+
+### Delete User by ID
+DELETE http://localhost:3000/users/6768758131002c769325e699
+
+### Create a New Post
 POST http://localhost:3000/posts
 Content-Type: application/json
 
 {
-  "title": "hello",
-  "sender": "May",
-  "body": "hi!"
+  "title": "My New Post",
+  "body": "post!",
+  "sender": "67687dc20cdaa32f405eeda5"
 }
 
 ### Get All Posts
 GET http://localhost:3000/posts
 
-### Get a Post by ID
-GET http://localhost:3000/posts/6768612a6997d58a0b2137fb
+### Get Post by ID
+GET http://localhost:3000/posts/676882ca74db5e158e34f234
 
-### Get Posts by Sender
-GET http://localhost:3000/posts?sender=May
-
-### Update a Post
-PUT http://localhost:3000/posts/6768612a6997d58a0b2137fb
+### Update Post by ID
+PUT http://localhost:3000/posts/6768828674db5e158e34f227
 Content-Type: application/json
 
 {
-  "title": "hi",
-  "body": "bye!!!"
+  "title": "Updated Post Title",
+  "body": "Updated content of the post"
 }
 
+### Delete Post by ID
+DELETE http://localhost:3000/posts/6768828674db5e158e34f227
 
-//----------------------------------------------->
-
-### Add a Comment
+### Create a New Comment for a Post
 POST http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "body": "beautiful!",
-  "postId": "6768612a6997d58a0b2137fb"
+  "body": "Cool!",
+  "postId": "676882ca74db5e158e34f234",
+  "userId": "6768758831002c769325e69c"
 }
-
-### Read a Comment by id
-GET http://localhost:3000/comments?id=676865fc0a454cc548d6fb27&postId=6768612a6997d58a0b2137fb
-
-### Update a Comment
-PUT http://localhost:3000/comments/676865fc0a454cc548d6fb27
-Content-Type: application/json
-
-{
-  "postId": "6768612a6997d58a0b2137fb",
-  "body": "nice!"
-}
-
-### Delete a Comment
-DELETE http://localhost:3000/comments?id=676862e7aae6c4e0a8190681&postId=6768612a6997d58a0b2137fb
 
 ### Get All Comments
 GET http://localhost:3000/comments
 
-### Get All Comments by Post
-GET http://localhost:3000/comments/6768612a6997d58a0b2137fb
+### Get All Comments for a Specific Post
+GET http://localhost:3000/comments/676882ca74db5e158e34f234
+
+### Update Comment by ID
+PUT http://localhost:3000/comments/676886182c660604ee4df6d0
+Content-Type: application/json
+
+{
+  "body": "Very cool!",
+  "postId": "676882ca74db5e158e34f234"
+}
+
+### Delete Comment by ID
+DELETE http://localhost:3000/comments
+Content-Type: application/json
+
+{
+  "id": "676886182c660604ee4df6d0",
+  "postId": "676882ca74db5e158e34f234"
+}

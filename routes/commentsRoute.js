@@ -1,21 +1,28 @@
 const express = require('express');
-const Post = require('../db/dbUtils');
+const { Post, User } = require('../db/dbUtils');
 const router = express.Router();
 
 // ADD COMMENT TO POST
 router.post('/', async (req, res) => {
     try {
-        const { body, postId } = req.body;
-        if (!body || !postId) {
-            return res.status(400).send({ error: 'Please provide body and postId' });
+        const { body, postId, userId } = req.body;
+        if (!body || !postId || !userId) {
+            return res.status(400).send({ error: 'Please provide body, postId, and userId' });
         }
 
-        const newComment = { body, date: Date.now() };
-        const update = { $push: { comments: newComment } };
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(400).send({ error: 'User not found' });
+        }
 
-        const updatedPost = await Post.findOneAndUpdate({ _id: postId }, update, {
-            returnDocument: 'after'
-        });
+        const newComment = { body, user: user._id };
+
+        const update = { $push: { comments: newComment } };
+        const updatedPost = await Post.findByIdAndUpdate(postId, update, { new: true });
+
+        if (!updatedPost) {
+            return res.status(404).send({ error: 'Post not found' });
+        }
 
         res.status(201).send(updatedPost);
     } catch (error) {
@@ -31,13 +38,13 @@ router.put('/:id', async (req, res) => {
         const id = req.params.id;
 
         if (!postId || !body || !id) {
-            return res.status(400).send({ error: 'Please provide comment id, body and postId' });
+            return res.status(400).send({ error: 'Please provide comment id, body, and postId' });
         }
 
         const update = {
             $set: {
                 "comments.$[comment].body": body,
-                "comments.$[comment].date": Date.now()
+                "comments.$[comment].updatedAt": Date.now()
             }
         };
 
@@ -62,27 +69,27 @@ router.put('/:id', async (req, res) => {
 // DELETE COMMENT BY ID
 router.delete('/', async (req, res) => {
     try {
-        const { id, postId } = req.query;
+        const { id, postId } = req.body;
+        
         if (!postId || !id) {
             return res.status(400).send({ error: 'Please provide comment id and postId' });
         }
 
-        const update = { $pull: { "comments": { _id: id } } };
+        const update = { $pull: { comments: { _id: id } } };
+        const updatedPost = await Post.findByIdAndUpdate(postId, update, { new: true });
 
-        const deleted = await Post.findOneAndUpdate({ _id: postId }, update, { returnDocument: 'after' });
-
-        if (!deleted) {
-            return res.status(404).send({ error: 'Comment not found' });
+        if (!updatedPost) {
+            return res.status(404).send({ error: 'Post or comment not found' });
         }
 
-        res.status(200).send(deleted);
+        res.status(200).send(updatedPost);
     } catch (error) {
         console.error('Error deleting comment:', error);
         res.status(500).send({ error: 'An error occurred while deleting the comment' });
     }
 });
 
-// GET ALL COMMENTS OR COMMENTS BY ID
+// GET ALL COMMENTS OR COMMENT BY ID
 router.get('/', async (req, res) => {
     try {
         const { id, postId } = req.query;
@@ -116,7 +123,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET ALL COMMENTS OF POST
+// GET ALL COMMENTS BY POST
 router.get('/:postId', async (req, res) => {
     try {
         const postId = req.params.postId;
@@ -124,16 +131,15 @@ router.get('/:postId', async (req, res) => {
             return res.status(400).send({ error: 'Please provide postId' });
         }
 
-        const postOfComments = await Post.findById(postId);
-
-        if (!postOfComments) {
+        const post = await Post.findById(postId).populate('comments.user');
+        if (!post) {
             return res.status(404).send({ error: 'Post not found' });
         }
 
-        res.status(200).send(postOfComments.comments);
+        res.status(200).send(post.comments);
     } catch (error) {
-        console.error('Error fetching comments of post:', error);
-        res.status(500).send({ error: 'An error occurred while fetching comments of the post' });
+        console.error('Error fetching comments:', error);
+        res.status(500).send({ error: 'An error occurred while fetching comments' });
     }
 });
 
