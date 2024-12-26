@@ -1,34 +1,39 @@
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }], // Reference to Post model
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }], // Reference to Post model
 });
 
 const postSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    body: { type: String, required: true },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    comments: [
-        {
-            body: { type: String, required: true },
-            date: { type: Date, default: Date.now },
-            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-        }
-    ],
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date },
-    hidden: { type: Boolean, default: false },
-    meta: {
-        votes: { type: Number, default: 0 },
-        favs: { type: Number, default: 0 }
-    }
+  title: { type: String, required: true },
+  body: { type: String, required: true },
+  author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  comments: [
+    {
+      body: { type: String, required: true },
+      date: { type: Date, default: Date.now },
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+    },
+  ],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date },
+  hidden: { type: Boolean, default: false },
+  meta: {
+    votes: { type: Number, default: 0 },
+    favs: { type: Number, default: 0 },
+  },
 });
 
-const User = mongoose.model('User', userSchema);
-const Post = mongoose.model('Post', postSchema);
+const User = mongoose.model("User", userSchema);
+const Post = mongoose.model("Post", postSchema);
 
-export { User, Post };
+module.exports = { User, Post };
