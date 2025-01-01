@@ -1,6 +1,6 @@
 const express = require("express");
 const { Post, User } = require("../db/dbUtils");
-const { authMiddleware } = require("../handlers/auth");
+const authMiddleware = require("../handlers/auth");
 
 const router = express.Router();
 router.use(authMiddleware);

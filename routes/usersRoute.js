@@ -5,7 +5,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { User } = require("../db/dbUtils");
-const { generateToken, authMiddleware } = require("../handlers/auth");
+const authMiddleware = require("../handlers/auth");
+const { generateToken } = require("../handlers/authUtils");
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -35,9 +36,11 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    await newUser.save();
-    res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
-    res.status(201).send(newUser);
+    const user = await newUser.save();
+    const userId = user._id.toString();
+
+    // res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
+    res.status(201).send(generateToken({ userId }));
   } catch (error) {
     console.error("Error creating user:", error);
     res
@@ -69,8 +72,10 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
-    res.status(201).send(existingUser);
+    // res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
+    const userId = existingUser._id.toString();
+
+    res.status(201).send(generateToken({ userId }));
   } catch (error) {
     console.error("Error login user:", error);
     res.status(500).send({ error: "An error occurred while login user" });
@@ -173,4 +178,4 @@ router.delete("/:id", async (req, res) => {
 });
 
 // export default router;
-module.exports = { router };
+module.exports = router;

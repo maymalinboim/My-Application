@@ -1,10 +1,20 @@
-### Create a New User
-POST http://localhost:3000/users
+### Register new User
+POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "username": "maychu",
-  "email": "maychu@gmail.com",
+  "username": "mori7",
+  "email": "mori7@gmail.com",
+  "password": "123"
+}
+
+### Login new User
+
+POST http://localhost:3000/users/login
+Content-Type: application/json
+
+{
+  "username": "mori7",
   "password": "123"
 }
 
@@ -32,9 +42,9 @@ POST http://localhost:3000/posts
 Content-Type: application/json
 
 {
-  "title": "My New Post",
+  "title": "My New Post4",
   "body": "post!",
-  "sender": "67687dc20cdaa32f405eeda5"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzc1ODNkNDFkMzQ2OGY1MzU1NmQ0MDYiLCJpYXQiOjE3MzU3NTUyMDAsImV4cCI6MTczNTg0MTYwMH0.q_CO2XTZHlHn2w5Ev6jcwg6NT3BH2Y8KUMjIHzZUQHE"
 }
 
 ### Get All Posts

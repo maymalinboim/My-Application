@@ -1,6 +1,8 @@
 const express = require("express");
 const { Post, User } = require("../db/dbUtils"); // Import both Post and User models
-const { authMiddleware } = require("../handlers/auth");
+const authMiddleware = require("../handlers/auth");
+const { options } = require("../handlers/auth");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -8,14 +10,15 @@ router.use(authMiddleware);
 // CREATE NEW POST
 router.post("/", async (req, res) => {
   try {
-    const { title, sender, body } = req.body;
-    if (!title || !sender || !body) {
+    const { title, token, body } = req.body;
+    if (!title || !token || !body) {
       return res
         .status(400)
-        .send({ error: "Please provide sender, title, and body" });
+        .send({ error: "Please provide token, title, and body" });
     }
 
-    const user = await User.findById(sender);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(400).send({ error: "User not found" });
     }
