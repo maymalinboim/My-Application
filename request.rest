@@ -3,13 +3,12 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "username": "mori7",
-  "email": "mori7@gmail.com",
+  "username": "mori8",
+  "email": "mori8@gmail.com",
   "password": "123"
 }
 
 ### Login new User
-
 POST http://localhost:3000/users/login
 Content-Type: application/json
 
@@ -17,6 +16,9 @@ Content-Type: application/json
   "username": "mori7",
   "password": "123"
 }
+
+### Logout
+POST http://localhost:3000/users/logout
 
 ### Get All Users
 GET http://localhost:3000/users
@@ -43,18 +45,25 @@ Content-Type: application/json
 
 {
   "title": "My New Post4",
-  "body": "post!",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzc1ODNkNDFkMzQ2OGY1MzU1NmQ0MDYiLCJpYXQiOjE3MzU3NTUyMDAsImV4cCI6MTczNTg0MTYwMH0.q_CO2XTZHlHn2w5Ev6jcwg6NT3BH2Y8KUMjIHzZUQHE"
-}
+  "body": "post!"
+  }
 
 ### Get All Posts
 GET http://localhost:3000/posts
 
+### Get Post by author
+GET http://localhost:3000/posts
+Content-Type: application/json
+
+{
+  "sender": "67756aa95fd92b49e2da43e2"
+}
+
 ### Get Post by ID
-GET http://localhost:3000/posts/676882ca74db5e158e34f234
+GET http://localhost:3000/posts/677573bee5ba3a5a9782fe6d
 
 ### Update Post by ID
-PUT http://localhost:3000/posts/6768828674db5e158e34f227
+PUT http://localhost:3000/posts/677586807fc995d5c981d6b3
 Content-Type: application/json
 
 {
@@ -63,7 +72,7 @@ Content-Type: application/json
 }
 
 ### Delete Post by ID
-DELETE http://localhost:3000/posts/6768828674db5e158e34f227
+DELETE http://localhost:3000/posts/677586807fc995d5c981d6b3
 
 ### Create a New Comment for a Post
 POST http://localhost:3000/comments

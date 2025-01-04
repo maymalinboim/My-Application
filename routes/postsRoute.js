@@ -1,7 +1,7 @@
 const express = require("express");
 const { Post, User } = require("../db/dbUtils"); // Import both Post and User models
 const authMiddleware = require("../handlers/auth");
-const { options } = require("../handlers/auth");
+const { options, getToken } = require("../handlers/authUtils");
 const jwt = require("jsonwebtoken");
 
 const router = express.Router();
@@ -10,12 +10,11 @@ router.use(authMiddleware);
 // CREATE NEW POST
 router.post("/", async (req, res) => {
   try {
-    const { title, token, body } = req.body;
-    if (!title || !token || !body) {
-      return res
-        .status(400)
-        .send({ error: "Please provide token, title, and body" });
+    const { title, body } = req.body;
+    if (!title || !body) {
+      return res.status(400).send({ error: "Please provide title, and body" });
     }
+    const token = getToken(req);
 
     const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
     const user = await User.findById(userId);
@@ -26,7 +25,7 @@ router.post("/", async (req, res) => {
     const newPost = new Post({
       title,
       body,
-      author: user._id,
+      author: userId,
     });
 
     await newPost.save();
@@ -47,7 +46,7 @@ router.post("/", async (req, res) => {
 // GET ALL POSTS OR POSTS BY SENDER
 router.get("/", async (req, res) => {
   try {
-    const { sender } = req.query;
+    const { sender } = req.body;
 
     if (sender) {
       const senderPosts = await Post.find({ author: sender }).populate(
@@ -62,7 +61,7 @@ router.get("/", async (req, res) => {
     }
 
     // Fetch all posts
-    const allPosts = await Post.find().populate("author");
+    const allPosts = await Post.find();
     res.status(200).send(allPosts);
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -108,15 +107,27 @@ router.put("/:id", async (req, res) => {
     if (title) updatedPost.title = title;
     if (body) updatedPost.body = body;
 
-    const postToUpdate = await Post.findOneAndUpdate({ _id: id }, updatedPost, {
-      returnDocument: "after",
-    });
+    const postToUpdate = await Post.findOne({ _id: id });
 
     if (!postToUpdate) {
       return res.status(404).send({ error: "Post not found" });
     }
 
-    res.status(200).send(postToUpdate);
+    const token = getToken(req);
+
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+
+    if (postToUpdate.author.toString() !== userId) {
+      return res
+        .status(401)
+        .send({ error: "No permission to update this post" });
+    }
+
+    res.status(200).send(
+      await Post.findOneAndUpdate({ _id: id }, updatedPost, {
+        returnDocument: "after",
+      })
+    );
   } catch (error) {
     console.error("Error updating post:", error);
     res
@@ -137,6 +148,16 @@ router.delete("/:id", async (req, res) => {
     const postToDelete = await Post.findById(postId).populate("author");
     if (!postToDelete) {
       return res.status(404).send({ error: "Post not found" });
+    }
+
+    const token = getToken(req);
+
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+
+    if (postToDelete.author._id.toString() !== userId) {
+      return res
+        .status(401)
+        .send({ error: "No permission to delete this post" });
     }
 
     const user = postToDelete.author;

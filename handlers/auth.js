@@ -1,12 +1,16 @@
 const { auth } = require("./authUtils");
 
 const authMiddleware = async (req, res, next) => {
-  if (req.url === "/register" || req.url === "/login") return next();
+  if (req.url === "/register" || req.url === "/login") {
+    res.clearCookie("Authorization", {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+    });
+    return next();
+  }
 
-  const { token } = req.body;
-  // if (auth(req.headers["authorization"])) return next();
-
-  if (auth(token)) return next();
+  if (auth(req)) return next();
 
   res.status(401).send("Unauthorized");
 };

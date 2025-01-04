@@ -39,8 +39,9 @@ router.post("/register", async (req, res) => {
     const user = await newUser.save();
     const userId = user._id.toString();
 
-    // res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
-    res.status(201).send(generateToken({ userId }));
+    const token = generateToken({ userId });
+    res.cookie("Authorization", `Bearer ${token}}`);
+    res.status(201).send(token);
   } catch (error) {
     console.error("Error creating user:", error);
     res
@@ -72,10 +73,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // res.cookie("Authorization", `Bearer ${generateToken({ username })}`);
     const userId = existingUser._id.toString();
+    const token = generateToken({ userId });
+    res.cookie("Authorization", `Bearer ${token}}`);
 
-    res.status(201).send(generateToken({ userId }));
+    res.status(201).send(token);
   } catch (error) {
     console.error("Error login user:", error);
     res.status(500).send({ error: "An error occurred while login user" });
@@ -84,7 +86,12 @@ router.post("/login", async (req, res) => {
 
 // LOGOUT
 router.post("/logout", async (req, res) => {
-  res.clearCookie("Authorization");
+  res.clearCookie("Authorization", {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+  });
+
   res.status(200).json({ message: "Logged out successfully" });
 });
 
@@ -123,6 +130,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE USER BY ID
+//TO DO
 router.put("/:id", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -156,6 +164,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE USER BY ID
+//TO DO
 router.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;

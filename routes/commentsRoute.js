@@ -41,6 +41,7 @@ router.post("/", async (req, res) => {
 });
 
 // UPDATE COMMENT BY ID
+//TO DO
 router.put("/:id", async (req, res) => {
   try {
     const { postId, body } = req.body;
@@ -84,6 +85,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE COMMENT BY ID
+//TO DO
 router.delete("/", async (req, res) => {
   try {
     const { id, postId } = req.body;
