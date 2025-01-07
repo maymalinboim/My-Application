@@ -7,6 +7,38 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 router.use(authMiddleware);
 
+/**
+ * @swagger
+ * /posts:
+ *   post:
+ *     summary: Create a new post
+ *     tags: [Posts]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - body
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Title of the post
+ *               body:
+ *                 type: string
+ *                 description: Content of the post
+ *     responses:
+ *       201:
+ *         description: Post successfully created.
+ *       400:
+ *         description: Invalid input data.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Error occurred during creation.
+ */
 // CREATE NEW POST
 router.post("/", async (req, res) => {
   try {
@@ -20,7 +52,7 @@ router.post("/", async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(400).send({ error: "User not found" });
+      return res.status(404).send({ error: "User not found" });
     }
 
     const newPost = new Post({
@@ -44,24 +76,34 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET ALL POSTS OR POSTS BY SENDER
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Retrieve all posts
+ *     tags: [Posts]
+ *     responses:
+ *       200:
+ *         description: A list of all posts.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   body:
+ *                     type: string
+ *       500:
+ *         description: Error occurred during fetch.
+ */
+// GET ALL POSTS
 router.get("/", async (req, res) => {
   try {
-    const { sender } = req.body;
-
-    if (sender) {
-      const senderPosts = await Post.find({ author: sender }).populate(
-        "author"
-      );
-      if (!senderPosts.length) {
-        return res
-          .status(404)
-          .send({ error: "No posts found for this sender" });
-      }
-      return res.status(200).send(senderPosts);
-    }
-
-    // Fetch all posts
     const allPosts = await Post.find();
     res.status(200).send(allPosts);
   } catch (error) {
@@ -70,6 +112,87 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /posts/sender/{authorId}:
+ *   get:
+ *     summary: Retrieve posts by a specific author
+ *     tags: [Posts]
+ *     parameters:
+ *       - name: authorId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the author
+ *     responses:
+ *       200:
+ *         description: A list of posts by the specified author.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   body:
+ *                     type: string
+ *                   authorId:
+ *                     type: string
+ *                     description: The ID of the author who created the post
+ *       400:
+ *         description: Invalid input.
+ *       404:
+ *         description: No posts found for the given author.
+ *       500:
+ *         description: Error occurred during fetch.
+ */
+// GET ALL POSTS BY SENDER
+router.get("/sender/:sender", async (req, res) => {
+  try {
+    const sender = req.params.sender;
+
+    if (!sender) {
+      return res.status(400).send({ error: "Please provide sender id" });
+    }
+    const senderPosts = await Post.find({ author: sender }).populate("author");
+    if (!senderPosts.length) {
+      return res.status(404).send({ error: "No posts found for this sender" });
+    }
+    return res.status(200).send(senderPosts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).send({ error: "An error occurred while fetching posts" });
+  }
+});
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   get:
+ *     summary: Retrieve a post by ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Post ID
+ *     responses:
+ *       200:
+ *         description: Post details.
+ *       400:
+ *         description: Ivalid input.
+ *       404:
+ *         description: Post not found.
+ *       500:
+ *         description: Error occurred during fetch.
+ */
 // GET POST BY ID
 router.get("/:id", async (req, res) => {
   try {
@@ -92,6 +215,42 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /posts/{id}:
+ *   put:
+ *     summary: Update a post by ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Post ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               body:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Post successfully updated.
+ *       400:
+ *         description: Invalid input.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Post not found.
+ *       500:
+ *         description: Error occurred during update.
+ */
 // UPDATE POST BY ID
 router.put("/:id", async (req, res) => {
   try {
@@ -136,6 +295,31 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /posts/{id}:
+ *   delete:
+ *     summary: Delete a post by ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Post ID
+ *     responses:
+ *       200:
+ *         description: Post successfully deleted.
+ *       400:
+ *         description: Invalid input.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Post not found.
+ *       500:
+ *         description: Error occurred during delete.
+ */
 // DELETE POST BY ID
 router.delete("/:id", async (req, res) => {
   try {

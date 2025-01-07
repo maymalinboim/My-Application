@@ -8,6 +8,37 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 router.use(authMiddleware);
 
+/**
+ * @swagger
+ * /users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User successfully registered.
+ *       400:
+ *         description: Invalid input data.
+ *       500:
+ *         description: Error occurred during creation.
+ */
 // CREATE NEW USER - REGISTER
 router.post("/register", async (req, res) => {
   try {
@@ -47,6 +78,36 @@ router.post("/register", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Successfully logged in.
+ *       400:
+ *         description: Invalid input.
+ *       401:
+ *         description: Invalid credentials.
+ *       500:
+ *         description: Error occurred during creation.
+ */
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
@@ -81,6 +142,18 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/logout:
+ *   post:
+ *     summary: Logout the current user
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Successfully logged out.
+ *       401:
+ *         description: Unauthorized.
+ */
 // LOGOUT
 router.post("/logout", async (req, res) => {
   res.clearCookie("Authorization", {
@@ -92,6 +165,29 @@ router.post("/logout", async (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: A list of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ */
 // GET ALL USERS
 router.get("/", async (req, res) => {
   try {
@@ -103,6 +199,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User details.
+ *       400:
+ *         description: Invalid input.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Error occurred during fetch.
+ */
 // GET USER BY ID
 router.get("/:id", async (req, res) => {
   try {
@@ -126,6 +245,44 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User successfully updated.
+ *       400:
+ *         description: Invalid input.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Error occurred during update.
+ */
 // UPDATE USER BY ID
 router.put("/:id", async (req, res) => {
   try {
@@ -175,6 +332,31 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User successfully deleted.
+ *       400:
+ *         description: Invalid input.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Error occurred during delete.
+ */
 // DELETE USER BY ID
 router.delete("/:id", async (req, res) => {
   try {

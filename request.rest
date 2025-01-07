@@ -51,19 +51,14 @@ Content-Type: application/json
 ### Get All Posts
 GET http://localhost:3000/posts
 
-### Get Post by author
-GET http://localhost:3000/posts
-Content-Type: application/json
-
-{
-  "sender": "677583d41d3468f53556d406"
-}
+### Get Posts by author
+GET http://localhost:3000/posts/sender/677cddf4c3a8deacf5f146a9
 
 ### Get Post by ID
-GET http://localhost:3000/posts/677ccd85748a1c5639751c72
+GET http://localhost:3000/posts/677cddffc3a8deacf5f146ac
 
 ### Update Post by ID
-PUT http://localhost:3000/posts/677ccd85748a1c5639751c72
+PUT http://localhost:3000/posts/677cddffc3a8deacf5f146ac
 Content-Type: application/json
 
 {
@@ -72,7 +67,7 @@ Content-Type: application/json
 }
 
 ### Delete Post by ID
-DELETE http://localhost:3000/posts/677ccd85748a1c5639751c72
+DELETE http://localhost:3000/posts/677cddffc3a8deacf5f146ac
 
 ### Create a New Comment for a Post
 POST http://localhost:3000/comments
@@ -84,19 +79,13 @@ Content-Type: application/json
   "userId": "6768758831002c769325e69c"
 }
 
-### Get All Comments
-GET http://localhost:3000/comments
-
-### Get All Comments for a Specific Post
-GET http://localhost:3000/comments/676882ca74db5e158e34f234
-
 ### Update Comment by ID
-PUT http://localhost:3000/comments/676886182c660604ee4df6d0
+PUT http://localhost:3000/comments/6766c599897130d6767ac175
 Content-Type: application/json
 
 {
   "body": "Very cool!",
-  "postId": "676882ca74db5e158e34f234"
+  "postId": "6766c478732f3d405570052e"
 }
 
 ### Delete Comment by ID
@@ -104,6 +93,18 @@ DELETE http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "id": "676886182c660604ee4df6d0",
-  "postId": "676882ca74db5e158e34f234"
+  "id": "6766ac8274c058d47921f23a",
+  "postId": "6764150fb11cd35b8bd207a9"
 }
+
+### Get All Comments
+GET http://localhost:3000/comments
+
+### Get Comment by ID
+GET http://localhost:3000/comments/commentId/?id=6766c599897130d6767ac175&postId=6766c478732f3d405570052e
+
+### Get All Comments for a Specific Post
+GET http://localhost:3000/comments/postId/6766c478732f3d405570052e
+
+
+

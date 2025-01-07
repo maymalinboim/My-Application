@@ -5,9 +5,13 @@ require("dotenv").config();
 const postsRoute = require("./routes/postsRoute");
 const commentsRoute = require("./routes/commentsRoute");
 const usersRoute = require("./routes/usersRoute");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swaggerConfig");
 
 const app = express();
 app.use(bodyParser.json());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
