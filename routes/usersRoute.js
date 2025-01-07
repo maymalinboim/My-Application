@@ -1,12 +1,9 @@
-// import express from "express";
-// import bcrypt from "bcrypt";
-// import { User } from "../db/dbUtils";
-// import { generateToken } from "../handlers/auth";
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { User } = require("../db/dbUtils");
 const authMiddleware = require("../handlers/auth");
-const { generateToken } = require("../handlers/authUtils");
+const { generateToken, getToken, options } = require("../handlers/authUtils");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -130,7 +127,6 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE USER BY ID
-//TO DO
 router.put("/:id", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -145,7 +141,23 @@ router.put("/:id", async (req, res) => {
     const updateData = {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
-    if (password) updateData.password = password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    if (password) updateData.password = hashedPassword;
+
+    const userToUpdate = await User.findOne({ _id: id });
+
+    if (!userToUpdate) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    const token = getToken(req);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+
+    if (userToUpdate._id.toString() !== userId) {
+      return res
+        .status(401)
+        .send({ error: "No permission to update this user" });
+    }
 
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -164,12 +176,20 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE USER BY ID
-//TO DO
 router.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     if (!id) {
       return res.status(400).send({ error: "Please provide user id" });
+    }
+
+    const token = getToken(req);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+
+    if (id !== userId) {
+      return res
+        .status(401)
+        .send({ error: "No permission to delete this post" });
     }
 
     const deletedUser = await User.findByIdAndDelete(id);
@@ -186,5 +206,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// export default router;
 module.exports = router;

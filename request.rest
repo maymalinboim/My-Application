@@ -13,8 +13,8 @@ POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-  "username": "mori7",
-  "password": "123"
+  "username": "mori66",
+  "password": "1234"
 }
 
 ### Logout
@@ -24,20 +24,20 @@ POST http://localhost:3000/users/logout
 GET http://localhost:3000/users
 
 ### Get User by ID
-GET http://localhost:3000/users/67687dc20cdaa32f405eeda5
+GET http://localhost:3000/users/677578d072a6170a956aba21
 
 ### Update User by ID
-PUT http://localhost:3000/users/67687dc20cdaa32f405eeda5
+PUT http://localhost:3000/users/677578d072a6170a956aba21
 Content-Type: application/json
 
 {
-  "username": "maychu1",
-  "email": "maychu1@gmail.com",
+  "username": "mori66",
+  "email": "mori66@gmail.com",
   "password": "1234"
 }
 
 ### Delete User by ID
-DELETE http://localhost:3000/users/6768758131002c769325e699
+DELETE http://localhost:3000/users/677578d072a6170a956aba21
 
 ### Create a New Post
 POST http://localhost:3000/posts
@@ -56,23 +56,23 @@ GET http://localhost:3000/posts
 Content-Type: application/json
 
 {
-  "sender": "67756aa95fd92b49e2da43e2"
+  "sender": "677583d41d3468f53556d406"
 }
 
 ### Get Post by ID
-GET http://localhost:3000/posts/677573bee5ba3a5a9782fe6d
+GET http://localhost:3000/posts/677ccd85748a1c5639751c72
 
 ### Update Post by ID
-PUT http://localhost:3000/posts/677586807fc995d5c981d6b3
+PUT http://localhost:3000/posts/677ccd85748a1c5639751c72
 Content-Type: application/json
 
 {
-  "title": "Updated Post Title",
-  "body": "Updated content of the post"
+  "title": "Updated Post Title0000",
+  "body": "Updated content0000 of the post"
 }
 
 ### Delete Post by ID
-DELETE http://localhost:3000/posts/677586807fc995d5c981d6b3
+DELETE http://localhost:3000/posts/677ccd85748a1c5639751c72
 
 ### Create a New Comment for a Post
 POST http://localhost:3000/comments

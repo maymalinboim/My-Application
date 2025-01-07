@@ -14,10 +14,11 @@ router.post("/", async (req, res) => {
     if (!title || !body) {
       return res.status(400).send({ error: "Please provide title, and body" });
     }
-    const token = getToken(req);
 
+    const token = getToken(req);
     const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(400).send({ error: "User not found" });
     }
@@ -114,7 +115,6 @@ router.put("/:id", async (req, res) => {
     }
 
     const token = getToken(req);
-
     const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
 
     if (postToUpdate.author.toString() !== userId) {
@@ -140,7 +140,6 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const postId = req.params.id;
-
     if (!postId) {
       return res.status(400).send({ error: "Please provide post id" });
     }
@@ -151,7 +150,6 @@ router.delete("/:id", async (req, res) => {
     }
 
     const token = getToken(req);
-
     const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
 
     if (postToDelete.author._id.toString() !== userId) {
