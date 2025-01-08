@@ -1,6 +1,8 @@
 const express = require("express");
 const { Post, User } = require("../db/dbUtils");
 const authMiddleware = require("../handlers/auth");
+const { options, getToken } = require("../handlers/authUtils");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -42,17 +44,19 @@ router.use(authMiddleware);
  *         description: Error occurred during update.
  */
 // ADD COMMENT TO POST
-//TO DO - instead of sending userId take ID from cookies (the comment belongs to the one that is logged in)
 router.post("/", async (req, res) => {
   try {
-    const { body, postId, userId } = req.body;
-    if (!body || !postId || !userId) {
+    const { body, postId } = req.body;
+    if (!body || !postId) {
       return res
         .status(400)
-        .send({ error: "Please provide body, postId, and userId" });
+        .send({ error: "Please provide body and postId" });
     }
 
+    const token = getToken(req);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).send({ error: "User not found" });
     }
@@ -117,7 +121,6 @@ router.post("/", async (req, res) => {
  *         description: Error occurred during update.
  */
 // UPDATE COMMENT BY ID
-//TO DO
 router.put("/:id", async (req, res) => {
   try {
     const { postId, body } = req.body;
@@ -129,6 +132,23 @@ router.put("/:id", async (req, res) => {
         .send({ error: "Please provide comment id, body, and postId" });
     }
 
+    const token = getToken(req);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    const postToUpdate = await Post.findOne({ _id: postId });
+    const comment = postToUpdate.comments.find((c) => c._id.toString() === id);
+    
+    if (userId != comment.user.toString()) {
+      return res
+      .status(401)
+      .send({ error: "No permission to update this comment" });
+    }  
+
     const update = {
       $set: {
         "comments.$[comment].body": body,
@@ -136,7 +156,7 @@ router.put("/:id", async (req, res) => {
       },
     };
 
-    const options = {
+    const updateOptions = {
       arrayFilters: [{ "comment._id": id }],
       returnDocument: "after",
     };
@@ -144,7 +164,7 @@ router.put("/:id", async (req, res) => {
     const updatedPost = await Post.findOneAndUpdate(
       { _id: postId },
       update,
-      options
+      updateOptions
     );
 
     if (!updatedPost) {
@@ -193,7 +213,6 @@ router.put("/:id", async (req, res) => {
  *         description: Error occurred during delete.
  */
 // DELETE COMMENT BY ID
-//TO DO
 router.delete("/", async (req, res) => {
   try {
     const { id, postId } = req.body;
@@ -203,6 +222,23 @@ router.delete("/", async (req, res) => {
         .status(400)
         .send({ error: "Please provide comment id and postId" });
     }
+
+    const token = getToken(req);
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    const postToDelete = await Post.findOne({ _id: postId });
+    const comment = postToDelete.comments.find((c) => c._id.toString() === id);
+    
+    if (userId != comment.user.toString()) {
+      return res
+      .status(401)
+      .send({ error: "No permission to delete this comment" });
+    }  
 
     const update = { $pull: { comments: { _id: id } } };
     const updatedPost = await Post.findByIdAndUpdate(postId, update, {

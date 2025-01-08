@@ -3,18 +3,18 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "username": "mori8",
-  "email": "mori8@gmail.com",
+  "username": "maymay2",
+  "email": "mayay2@gmail.com",
   "password": "123"
 }
 
-### Login new User
+### Login
 POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-  "username": "mori66",
-  "password": "1234"
+  "username": "maymay",
+  "password": "123"
 }
 
 ### Logout
@@ -24,10 +24,10 @@ POST http://localhost:3000/users/logout
 GET http://localhost:3000/users
 
 ### Get User by ID
-GET http://localhost:3000/users/677578d072a6170a956aba21
+GET http://localhost:3000/users/67687dc20cdaa32f405eeda5
 
 ### Update User by ID
-PUT http://localhost:3000/users/677578d072a6170a956aba21
+PUT http://localhost:3000/users/677ee7f40c6a8d45bff4316e
 Content-Type: application/json
 
 {
@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### Delete User by ID
-DELETE http://localhost:3000/users/677578d072a6170a956aba21
+DELETE http://localhost:3000/users/677ee7f40c6a8d45bff4316e
 
 ### Create a New Post
 POST http://localhost:3000/posts
@@ -52,13 +52,13 @@ Content-Type: application/json
 GET http://localhost:3000/posts
 
 ### Get Posts by author
-GET http://localhost:3000/posts/sender/677cddf4c3a8deacf5f146a9
+GET http://localhost:3000/posts/sender/677ee9300c6a8d45bff43186
 
 ### Get Post by ID
-GET http://localhost:3000/posts/677cddffc3a8deacf5f146ac
+GET http://localhost:3000/posts/677ee9410c6a8d45bff4318b
 
 ### Update Post by ID
-PUT http://localhost:3000/posts/677cddffc3a8deacf5f146ac
+PUT http://localhost:3000/posts/677ee9410c6a8d45bff4318b
 Content-Type: application/json
 
 {
@@ -67,25 +67,24 @@ Content-Type: application/json
 }
 
 ### Delete Post by ID
-DELETE http://localhost:3000/posts/677cddffc3a8deacf5f146ac
+DELETE http://localhost:3000/posts/677ee9410c6a8d45bff4318b
 
 ### Create a New Comment for a Post
 POST http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "body": "Cool!",
-  "postId": "676882ca74db5e158e34f234",
-  "userId": "6768758831002c769325e69c"
+  "body": "Cool!3",
+  "postId": "676854fc5fd77d670d3cbbb5"
 }
 
 ### Update Comment by ID
-PUT http://localhost:3000/comments/6766c599897130d6767ac175
+PUT http://localhost:3000/comments/677ef71debd43717d973041a
 Content-Type: application/json
 
 {
-  "body": "Very cool!",
-  "postId": "6766c478732f3d405570052e"
+  "body": "wai!!!222",
+  "postId": "676854fc5fd77d670d3cbbb5"
 }
 
 ### Delete Comment by ID
@@ -93,18 +92,18 @@ DELETE http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "id": "6766ac8274c058d47921f23a",
-  "postId": "6764150fb11cd35b8bd207a9"
+  "id": "677ef71debd43717d973041a",
+  "postId": "676854fc5fd77d670d3cbbb5"
 }
 
 ### Get All Comments
 GET http://localhost:3000/comments
 
 ### Get Comment by ID
-GET http://localhost:3000/comments/commentId/?id=6766c599897130d6767ac175&postId=6766c478732f3d405570052e
+GET http://localhost:3000/comments/commentId/?id=677eecd4ed486aa4381b35bb&postId=676854fc5fd77d670d3cbbb5
 
 ### Get All Comments for a Specific Post
-GET http://localhost:3000/comments/postId/6766c478732f3d405570052e
+GET http://localhost:3000/comments/postId/676854fc5fd77d670d3cbbb5
 
 
 
