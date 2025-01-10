@@ -22,7 +22,6 @@ router.use(authMiddleware);
  *             required:
  *               - body
  *               - postId
- *               - userId
  *             properties:
  *               body:
  *                 type: string
@@ -30,9 +29,6 @@ router.use(authMiddleware);
  *               postId:
  *                 type: string
  *                 description: ID of the post to comment on
- *               userId:
- *                 type: string
- *                 description: ID of the user making the comment
  *     responses:
  *       201:
  *         description: Comment successfully created.
@@ -48,9 +44,7 @@ router.post("/", async (req, res) => {
   try {
     const { body, postId } = req.body;
     if (!body || !postId) {
-      return res
-        .status(400)
-        .send({ error: "Please provide body and postId" });
+      return res.status(400).send({ error: "Please provide body and postId" });
     }
 
     const token = getToken(req);
@@ -115,8 +109,10 @@ router.post("/", async (req, res) => {
  *         description: Comment successfully updated.
  *       400:
  *         description: Invalid input.
+ *       401:
+ *         description: No permission.
  *       404:
- *         description: Post or Comment not found.
+ *         description: Post, Comment or User not found.
  *       500:
  *         description: Error occurred during update.
  */
@@ -142,12 +138,12 @@ router.put("/:id", async (req, res) => {
 
     const postToUpdate = await Post.findOne({ _id: postId });
     const comment = postToUpdate.comments.find((c) => c._id.toString() === id);
-    
+
     if (userId != comment.user.toString()) {
       return res
-      .status(401)
-      .send({ error: "No permission to update this comment" });
-    }  
+        .status(401)
+        .send({ error: "No permission to update this comment" });
+    }
 
     const update = {
       $set: {
@@ -207,6 +203,8 @@ router.put("/:id", async (req, res) => {
  *         description: Comment successfully deleted.
  *       400:
  *         description: Invalid input.
+ *       401:
+ *         description: No permission.
  *       404:
  *         description: Post or Comment not found.
  *       500:
@@ -233,12 +231,12 @@ router.delete("/", async (req, res) => {
 
     const postToDelete = await Post.findOne({ _id: postId });
     const comment = postToDelete.comments.find((c) => c._id.toString() === id);
-    
+
     if (userId != comment.user.toString()) {
       return res
-      .status(401)
-      .send({ error: "No permission to delete this comment" });
-    }  
+        .status(401)
+        .send({ error: "No permission to delete this comment" });
+    }
 
     const update = { $pull: { comments: { _id: id } } };
     const updatedPost = await Post.findByIdAndUpdate(postId, update, {
