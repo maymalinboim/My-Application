@@ -3,8 +3,8 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "username": "maymay2",
-  "email": "mayay2@gmail.com",
+  "username": "maymay991",
+  "email": "mayay991@gmail.com",
   "password": "123"
 }
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
   "username": "maymay",
-  "password": "123"
+  "password": "1234"
 }
 
 ### Logout
@@ -24,20 +24,20 @@ POST http://localhost:3000/users/logout
 GET http://localhost:3000/users
 
 ### Get User by ID
-GET http://localhost:3000/users/67687dc20cdaa32f405eeda5
+GET http://localhost:3000/users/677ee9300c6a8d45bff43186
 
 ### Update User by ID
-PUT http://localhost:3000/users/677ee7f40c6a8d45bff4316e
+PUT http://localhost:3000/users/6792a7d8945ef7d79906413b
 Content-Type: application/json
 
 {
-  "username": "mori66",
-  "email": "mori66@gmail.com",
+  "username": "maymay88",
+  "email": "mayay8910@gmail.com",
   "password": "1234"
 }
 
 ### Delete User by ID
-DELETE http://localhost:3000/users/677ee7f40c6a8d45bff4316e
+DELETE http://localhost:3000/users/6792a7d8945ef7d79906413b
 
 ### Create a New Post
 POST http://localhost:3000/posts
@@ -55,10 +55,10 @@ GET http://localhost:3000/posts
 GET http://localhost:3000/posts/sender/677ee9300c6a8d45bff43186
 
 ### Get Post by ID
-GET http://localhost:3000/posts/677ee9410c6a8d45bff4318b
+GET http://localhost:3000/posts/67685c2bf888889ca9c44099
 
 ### Update Post by ID
-PUT http://localhost:3000/posts/677ee9410c6a8d45bff4318b
+PUT http://localhost:3000/posts/678531d2c02c815f774f9590
 Content-Type: application/json
 
 {
@@ -67,23 +67,23 @@ Content-Type: application/json
 }
 
 ### Delete Post by ID
-DELETE http://localhost:3000/posts/677ee9410c6a8d45bff4318b
+DELETE http://localhost:3000/posts/678531d2c02c815f774f9590
 
 ### Create a New Comment for a Post
 POST http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "body": "Cool!3",
+  "body": "new comment!",
   "postId": "676854fc5fd77d670d3cbbb5"
 }
 
 ### Update Comment by ID
-PUT http://localhost:3000/comments/677ef71debd43717d973041a
+PUT http://localhost:3000/comments/6792ad75f931781a756294af
 Content-Type: application/json
 
 {
-  "body": "wai!!!222",
+  "body": "new comment?!!!",
   "postId": "676854fc5fd77d670d3cbbb5"
 }
 
@@ -92,7 +92,7 @@ DELETE http://localhost:3000/comments
 Content-Type: application/json
 
 {
-  "id": "677ef71debd43717d973041a",
+  "id": "6792ad75f931781a756294af",
   "postId": "676854fc5fd77d670d3cbbb5"
 }
 

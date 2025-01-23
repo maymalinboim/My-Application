@@ -1,9 +1,9 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const { User } = require("../db/dbUtils");
-const authMiddleware = require("../handlers/auth");
-const { generateToken, getToken, options } = require("../handlers/authUtils");
-const jwt = require("jsonwebtoken");
+import express, { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { User } from "../db/dbUtils";
+import authMiddleware from "../handlers/auth";
+import { generateToken, getToken, options } from "../handlers/authUtils";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -40,20 +40,22 @@ router.use(authMiddleware);
  *         description: Error occurred during creation.
  */
 // CREATE NEW USER - REGISTER
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res
+      res
         .status(400)
         .send({ error: "Please provide username, email, and password" });
+      return;
     }
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      return res
+      res
         .status(400)
         .send({ error: "User already exists with that username or email" });
+      return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -109,18 +111,20 @@ router.post("/register", async (req, res) => {
  *         description: Error occurred during creation.
  */
 // LOGIN
-router.post("/login", async (req, res) => {
+router.post("/login", async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      return res
+      res
         .status(400)
         .send({ error: "Please provide username and password" });
+      return;
     }
 
     const existingUser = await User.findOne({ username });
     if (!existingUser) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -128,7 +132,8 @@ router.post("/login", async (req, res) => {
       existingUser.password
     );
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      res.status(401).json({ message: "Invalid credentials" });
+      return;
     }
 
     const userId = existingUser._id.toString();
@@ -155,7 +160,7 @@ router.post("/login", async (req, res) => {
  *         description: Unauthorized.
  */
 // LOGOUT
-router.post("/logout", async (req, res) => {
+router.post("/logout", async (req: Request, res: Response) => {
   res.clearCookie("Authorization", {
     path: "/",
     httpOnly: true,
@@ -189,7 +194,7 @@ router.post("/logout", async (req, res) => {
  *                     type: string
  */
 // GET ALL USERS
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.status(200).send(users);
@@ -223,17 +228,19 @@ router.get("/", async (req, res) => {
  *         description: Error occurred during fetch.
  */
 // GET USER BY ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     if (!id) {
-      return res.status(400).send({ error: "Please provide user id" });
+      res.status(400).send({ error: "Please provide user id" });
+      return;
     }
 
     const user = await User.findById(id).populate("posts");
 
     if (!user) {
-      return res.status(404).send({ error: "User not found" });
+      res.status(404).send({ error: "User not found" });
+      return;
     }
 
     res.status(200).send(user);
@@ -284,18 +291,19 @@ router.get("/:id", async (req, res) => {
  *         description: Error occurred during update.
  */
 // UPDATE USER BY ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
     const id = req.params.id;
 
     if (!id) {
-      return res
+      res
         .status(400)
         .send({ error: "Please provide user id and update details" });
+      return;
     }
 
-    const updateData = {};
+    const updateData: { username?: string; email?: string; password?: string } = {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -304,23 +312,26 @@ router.put("/:id", async (req, res) => {
     const userToUpdate = await User.findOne({ _id: id });
 
     if (!userToUpdate) {
-      return res.status(404).send({ error: "User not found" });
+      res.status(404).send({ error: "User not found" });
+      return;
     }
 
-    const token = getToken(req);
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+    const token = getToken(req) || '';
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
 
     if (userToUpdate._id.toString() !== userId) {
-      return res
+      res
         .status(401)
         .send({ error: "No permission to update this user" });
+      return;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
       new: true,
     });
     if (!updatedUser) {
-      return res.status(404).send({ error: "User not found" });
+      res.status(404).send({ error: "User not found" });
+      return;
     }
 
     res.status(200).send(updatedUser);
@@ -358,25 +369,28 @@ router.put("/:id", async (req, res) => {
  *         description: Error occurred during delete.
  */
 // DELETE USER BY ID
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     if (!id) {
-      return res.status(400).send({ error: "Please provide user id" });
+      res.status(400).send({ error: "Please provide user id" });
+      return;
     }
 
-    const token = getToken(req);
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET, options);
+    const token = getToken(req) || '';
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
 
     if (id !== userId) {
-      return res
+      res
         .status(401)
         .send({ error: "No permission to delete this post" });
+      return;
     }
 
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
-      return res.status(404).send({ error: "User not found" });
+      res.status(404).send({ error: "User not found" });
+      return;
     }
 
     res.status(200).send(deletedUser);
@@ -388,4 +402,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

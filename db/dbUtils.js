@@ -1,4 +1,3 @@
-// import mongoose from 'mongoose';
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
@@ -6,7 +5,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }], // Reference to Post model
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 });
 
 const postSchema = new mongoose.Schema({
