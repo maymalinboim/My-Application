@@ -19,6 +19,7 @@ const handleLogin = async (username: string, password: string) => {
   });
   return res.status === 201;
 };
+
 const handleRegister = async (
   username: string,
   email: string,
@@ -40,20 +41,25 @@ export default function AuthPage() {
     formState: { errors },
   } = useForm<AuthForm>();
 
-  const onSubmit = (data: AuthForm) => {
+  const onSubmit = async (data: AuthForm) => {
     if (isLogin) {
-      console.log(isLogin ? "Logging in..." : "Registering...", data);
-      handleLogin(data.username, data.password);
+      const succeed = await handleLogin(data.username, data.password);
+      console.log(succeed);
     } else {
-      handleRegister(data.username, data.email || "", data.password);
+      const created = await handleRegister(
+        data.username,
+        data.email || "",
+        data.password
+      );
+      console.log(created);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-center text-red-500 text-xl font-bold p-3">
+          <CardTitle className="text-center text-xl font-bold p-3">
             {isLogin ? "Login" : "Register"}
           </CardTitle>
         </CardHeader>
