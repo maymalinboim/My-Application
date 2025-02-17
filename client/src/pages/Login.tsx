@@ -1,13 +1,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import config from "@/config";
 import axios from "axios";
 
@@ -24,7 +19,6 @@ const handleLogin = async (username: string, password: string) => {
   });
   return res.status === 201;
 };
-
 const handleRegister = async (
   username: string,
   email: string,
@@ -48,6 +42,7 @@ export default function AuthPage() {
 
   const onSubmit = (data: AuthForm) => {
     if (isLogin) {
+      console.log(isLogin ? "Logging in..." : "Registering...", data);
       handleLogin(data.username, data.password);
     } else {
       handleRegister(data.username, data.email || "", data.password);
@@ -55,13 +50,15 @@ export default function AuthPage() {
   };
 
   return (
-    <div>
-      <Card>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle>{isLogin ? "Login" : "Register"}</CardTitle>
+          <CardTitle className="text-center text-red-500 text-xl font-bold p-3">
+            {isLogin ? "Login" : "Register"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Input
                 type="username"
@@ -69,7 +66,11 @@ export default function AuthPage() {
                 {...register("username", { required: "Username is required" })}
                 className="w-full"
               />
-              {errors.username && <p>{errors.username.message}</p>}
+              {errors.username && (
+                <p className="text-red-500 text-sm">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
             {!isLogin && (
               <div>
@@ -79,7 +80,9 @@ export default function AuthPage() {
                   {...register("email", { required: "Email is required" })}
                   className="w-full"
                 />
-                {errors.email && <p>{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </div>
             )}
             <div>
@@ -89,16 +92,24 @@ export default function AuthPage() {
                 {...register("password", {
                   required: "Password is required",
                 })}
+                className="w-full"
               />
-              {errors.password && <p>{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
             <Button type="submit" className="w-full">
               {isLogin ? "Login" : "Register"}
             </Button>
           </form>
-          <p>
+          <p className="text-center text-sm mt-4">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button onClick={() => setIsLogin(!isLogin)}>
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-gray-600 hover:underline"
+            >
               {isLogin ? "Register" : "Login"}
             </button>
           </p>

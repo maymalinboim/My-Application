@@ -31,7 +31,7 @@ export default function AuthPage2() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-center text-xl font-bold p-3">
+          <CardTitle className="text-center text-red-500 text-xl font-bold p-3">
             {isLogin ? "Login" : "Register"}
           </CardTitle>
         </CardHeader>
