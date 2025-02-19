@@ -24,10 +24,14 @@ export const getToken = (req: Request): string | undefined => {
 export const auth = (req: Request): boolean => {
   try {
     const token = getToken(req);
-
+    console.log("token: ", token);
     if (!token) return false;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string, options) as {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+      options
+    ) as {
       userId: string;
     };
 

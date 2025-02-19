@@ -13,16 +13,8 @@ import cors from "cors";
 dotenv.config();
 const app = express();
 
-const allowedOrigins = process.env.ALLOWED_ORIGIN;
-
 const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (allowedOrigins === origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: process.env.ALLOWED_ORIGIN,
   credentials: true,
 };
 

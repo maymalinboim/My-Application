@@ -3,8 +3,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import config from "@/config";
-import axios from "axios";
+import { loginUser, registerUser } from "@/actions/authActions";
 
 interface AuthForm {
   username: string;
@@ -12,29 +11,9 @@ interface AuthForm {
   password: string;
 }
 
-const handleLogin = async (username: string, password: string) => {
-  const res = await axios.post(`${config.SERVER_URL}/users/login`, {
-    username,
-    password,
-  });
-  return res.status === 201;
-};
-
-const handleRegister = async (
-  username: string,
-  email: string,
-  password: string
-) => {
-  const res = await axios.post(`${config.SERVER_URL}/users/register`, {
-    username,
-    email,
-    password,
-  });
-  return res.status === 201;
-};
-
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [generalError, setGeneralError] = useState("");
   const {
     register,
     handleSubmit,
@@ -42,21 +21,25 @@ export default function AuthPage() {
   } = useForm<AuthForm>();
 
   const onSubmit = async (data: AuthForm) => {
-    if (isLogin) {
-      const succeed = await handleLogin(data.username, data.password);
-      console.log(succeed);
-    } else {
-      const created = await handleRegister(
-        data.username,
-        data.email || "",
-        data.password
-      );
-      console.log(created);
+    try {
+      if (isLogin) {
+        await loginUser(data.username, data.password);
+      } else {
+        await registerUser(data.username, data.email || "", data.password);
+      }
+    } catch (error: any) {
+      if (error.status === 401) {
+        setGeneralError("Incorrect credentials");
+      } else {
+        setGeneralError("Internal error");
+      }
     }
   };
 
+  const errorClass = "text-red-500 text-xs w-fit ml-1 mt-1";
+
   return (
-    <div className="flex items-center justify-center bg-gray-100 p-4">
+    <div className="flex items-center justify-center bg-gray-100 rounded w-1/3 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-center text-xl font-bold p-3">
@@ -73,9 +56,7 @@ export default function AuthPage() {
                 className="w-full"
               />
               {errors.username && (
-                <p className="text-red-500 text-sm">
-                  {errors.username.message}
-                </p>
+                <p className={errorClass}>{errors.username.message}</p>
               )}
             </div>
             {!isLogin && (
@@ -87,7 +68,7 @@ export default function AuthPage() {
                   className="w-full"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  <p className={errorClass}>{errors.email.message}</p>
                 )}
               </div>
             )}
@@ -101,14 +82,13 @@ export default function AuthPage() {
                 className="w-full"
               />
               {errors.password && (
-                <p className="text-red-500 text-sm">
-                  {errors.password.message}
-                </p>
+                <p className={errorClass}>{errors.password.message}</p>
               )}
             </div>
             <Button type="submit" className="w-full">
               {isLogin ? "Login" : "Register"}
             </Button>
+            {generalError && <p className={errorClass}>{generalError}</p>}
           </form>
           <p className="text-center text-sm mt-4">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
