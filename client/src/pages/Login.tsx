@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginUser, registerUser } from "@/actions/authActions";
+import { isTokenValid } from "@/utils/authUtils";
 
 interface AuthForm {
   username: string;
@@ -12,6 +15,7 @@ interface AuthForm {
 }
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [generalError, setGeneralError] = useState("");
   const {
@@ -20,6 +24,18 @@ export default function AuthPage() {
     formState: { errors },
   } = useForm<AuthForm>();
 
+  useEffect(() => {
+    validateToken();
+  }, [navigate]);
+
+  const validateToken = () => {
+    const token = Cookies.get("Authorization") || "";
+
+    if (isTokenValid(token)) {
+      navigate("/profile");
+    }
+  };
+
   const onSubmit = async (data: AuthForm) => {
     try {
       if (isLogin) {
@@ -27,6 +43,8 @@ export default function AuthPage() {
       } else {
         await registerUser(data.username, data.email || "", data.password);
       }
+
+      validateToken();
     } catch (error: any) {
       if (error.status === 401) {
         setGeneralError("Incorrect credentials");

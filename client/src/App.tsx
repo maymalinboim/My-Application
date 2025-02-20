@@ -1,13 +1,17 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import AuthPage from "./pages/Login";
 import ProfilePage from "./pages/Profile";
-import Cookies from "js-cookie";
-import { isTokenValid } from "./utils/authUtils";
 
 function App() {
-  const token = Cookies.get("Authorization") || "";
-
-  return <>{isTokenValid(token) ? <ProfilePage /> : <AuthPage />}</>;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<AuthPage />} /> {/* Home page */}
+        <Route path="/profile" element={<ProfilePage />} /> {/* Dashboard */}
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

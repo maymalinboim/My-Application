@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { getUser } from "@/actions/profileActions";
 import Cookies from "js-cookie";
+import { isTokenValid } from "@/utils/authUtils";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   username: string;
@@ -15,10 +17,10 @@ interface User {
 }
 
 const initialUser: User = {
-  username: "john_doe",
-  email: "john@example.com",
-  password: "123",
-  profilePhoto: "https://via.placeholder.com/150",
+  username: "",
+  email: "",
+  password: "",
+  profilePhoto: "",
 };
 
 const userPosts = [
@@ -28,14 +30,39 @@ const userPosts = [
 ];
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User>(initialUser);
-  const [newUsername, setNewUsername] = useState<string>(user.username);
+  const [newUser, setNewUser] = useState<User>(user);
 
-  const token = Cookies.get("Authorization") || "";
-  getUser(token).then((data) => console.log(data));
+  useEffect(() => {
+    validateToken();
+  }, [navigate]);
+
+  useEffect(() => {
+    getUserDetails();
+  }, []);
+
+  useEffect(() => {
+    console.log(newUser);
+  }, [newUser]);
+
+  const validateToken = () => {
+    const token = Cookies.get("Authorization") || "";
+
+    if (!isTokenValid(token)) {
+      navigate("/");
+    }
+  };
+
+  const getUserDetails = async () => {
+    const token = Cookies.get("Authorization") || "";
+    const currentUser = await getUser(token);
+    setUser(currentUser.data);
+    console.log(user);
+  }
 
   const handleUsernameUpdate = () => {
-    setUser({ ...user, username: newUsername });
+    setUser({ ...user, username: newUser.username });
     alert("Username updated!");
   };
 
@@ -56,25 +83,37 @@ export default function ProfilePage() {
         <CardContent className="flex items-center gap-3 justify-around">
           <Avatar className="w-32 h-32">
             <AvatarImage src={user.profilePhoto} alt="Profile Photo" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
 
           <div className="space-y-4 w-1/2">
             <div>
-              <Label htmlFor="username">Username:</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
+                value={newUser.username}
+                placeholder={user.username}
+                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
               />
             </div>
             <div>
-              <Label htmlFor="email">Email:</Label>
-              <Input id="email" value={user.email} disabled={true} />
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={newUser.email}
+                placeholder={user.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              />
             </div>
             <div>
-              <Label htmlFor="password">Password:</Label>
-              <Input id="password" value={user.password} disabled={true} />
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={newUser.password}
+                placeholder={"**********"}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              />
             </div>
             {/* <div>
               <Label htmlFor="photo">Update Photo:</Label>
