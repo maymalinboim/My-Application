@@ -70,7 +70,7 @@ router.post("/register", async (req: Request, res: Response) => {
     const userId = user._id.toString();
 
     const token = generateToken({ userId });
-    res.cookie("Authorization", `Bearer ${token}}`);
+    res.cookie("Authorization", `Bearer ${token}`);
     res.status(201).send(token);
   } catch (error) {
     console.error("Error creating user:", error);
@@ -115,9 +115,7 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      res
-        .status(400)
-        .send({ error: "Please provide username and password" });
+      res.status(400).send({ error: "Please provide username and password" });
       return;
     }
 
@@ -138,7 +136,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
     const userId = existingUser._id.toString();
     const token = generateToken({ userId });
-    res.cookie("Authorization", `Bearer ${token}}`);
+    res.cookie("Authorization", `Bearer ${token}`);
 
     res.status(201).send(token);
   } catch (error) {
@@ -303,7 +301,8 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const updateData: { username?: string; email?: string; password?: string } = {};
+    const updateData: { username?: string; email?: string; password?: string } =
+      {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -316,13 +315,15 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getToken(req) || "";
+    const { userId } = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+      options
+    ) as jwt.JwtPayload;
 
     if (userToUpdate._id.toString() !== userId) {
-      res
-        .status(401)
-        .send({ error: "No permission to update this user" });
+      res.status(401).send({ error: "No permission to update this user" });
       return;
     }
 
@@ -377,13 +378,15 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getToken(req) || "";
+    const { userId } = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+      options
+    ) as jwt.JwtPayload;
 
     if (id !== userId) {
-      res
-        .status(401)
-        .send({ error: "No permission to delete this post" });
+      res.status(401).send({ error: "No permission to delete this post" });
       return;
     }
 
