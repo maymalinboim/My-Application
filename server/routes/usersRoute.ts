@@ -2,8 +2,14 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import { generateToken, getToken, options } from "../handlers/authUtils";
 import jwt from "jsonwebtoken";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  getAccessToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+} from "../handlers/authUtils";
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -39,44 +45,36 @@ router.use(authMiddleware);
  *       500:
  *         description: Error occurred during creation.
  */
-// CREATE NEW USER - REGISTER
+// REGISTER
 router.post("/register", async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      res
-        .status(400)
-        .send({ error: "Please provide username, email, and password" });
+      res.status(400).send({ error: "Please provide all fields" });
       return;
     }
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      res
-        .status(400)
-        .send({ error: "User already exists with that username or email" });
+      res.status(400).send({ error: "User already exists" });
       return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
+    const newUser = new User({ username, email, password: hashedPassword });
     const user = await newUser.save();
     const userId = user._id.toString();
 
-    const token = generateToken({ userId });
-    res.cookie("Authorization", `Bearer ${token}`);
-    res.status(201).send(token);
+    const accessToken = generateAccessToken({ userId });
+    const refreshToken = generateRefreshToken({ userId });
+
+    res.cookie("refreshToken", refreshToken);
+    res.cookie("Authorization", `Bearer ${accessToken}`);
+
+    res.status(201).send({ accessToken });
   } catch (error) {
     console.error("Error creating user:", error);
-    res
-      .status(500)
-      .send({ error: "An error occurred while creating the user" });
+    res.status(500).send({ error: "An error occurred" });
   }
 });
 
@@ -115,7 +113,7 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      res.status(400).send({ error: "Please provide username and password" });
+      res.status(400).send({ error: "Please provide all fields" });
       return;
     }
 
@@ -135,15 +133,37 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     const userId = existingUser._id.toString();
-    const token = generateToken({ userId });
-    res.cookie("Authorization", `Bearer ${token}`);
+    const accessToken = generateAccessToken({ userId });
+    const refreshToken = generateRefreshToken({ userId });
 
-    res.status(201).send(token);
+    res.cookie("refreshToken", refreshToken);
+    res.cookie("Authorization", `Bearer ${accessToken}`);
+
+    res.status(201).send({ accessToken });
   } catch (error) {
     console.error("Error login user:", error);
-    res.status(500).send({ error: "An error occurred while login user" });
+    res.status(500).send({ error: "An error occurred" });
   }
 });
+
+// router.post("/refresh", (req: Request, res: Response) => {
+//   const refreshToken = req.cookies["refreshToken"];
+//   if (!refreshToken) {
+//     res.status(403).send("Refresh token is required");
+//     return;
+//   }
+
+//   const decoded = verifyRefreshToken(refreshToken);
+//   if (!decoded) {
+//     res.status(403).send("Invalid or expired refresh token");
+//     return;
+//   }
+
+//   const newAccessToken = generateAccessToken({ userId: decoded.userId });
+//   res.cookie("Authorization", `Bearer ${newAccessToken}`);
+
+//   res.json({ accessToken: newAccessToken });
+// });
 
 /**
  * @swagger
@@ -158,13 +178,9 @@ router.post("/login", async (req: Request, res: Response) => {
  *         description: Unauthorized.
  */
 // LOGOUT
-router.post("/logout", async (req: Request, res: Response) => {
-  res.clearCookie("Authorization", {
-    path: "/",
-    httpOnly: true,
-    secure: true,
-  });
-
+router.post("/logout", (req: Request, res: Response) => {
+  res.clearCookie("Authorization");
+  res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logged out successfully" });
 });
 
@@ -315,12 +331,8 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || "";
-    const { userId } = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string,
-      options
-    ) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
 
     if (userToUpdate._id.toString() !== userId) {
       res.status(401).send({ error: "No permission to update this user" });
@@ -378,12 +390,8 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || "";
-    const { userId } = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string,
-      options
-    ) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
 
     if (id !== userId) {
       res.status(401).send({ error: "No permission to delete this post" });

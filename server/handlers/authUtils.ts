@@ -1,38 +1,99 @@
 import jwt, { SignOptions } from "jsonwebtoken";
-import { Request } from "express";
+import { Request, Response } from "express";
+import dotenv from "dotenv";
 
-export const options: SignOptions = { expiresIn: "24h", algorithm: "HS256" };
+dotenv.config();
 
-export const generateToken = (username: { userId: string }): string => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined in environment variables");
-  }
-
-  return jwt.sign(username, process.env.JWT_SECRET, options);
+const accessTokenOptions: SignOptions = {
+  expiresIn: "15m",
+  algorithm: "HS256",
+};
+const refreshTokenOptions: SignOptions = {
+  expiresIn: "7d",
+  algorithm: "HS256",
 };
 
-export const getToken = (req: Request): string | undefined => {
+export const generateAccessToken = (user: { userId: string }): string => {
+  if (!process.env.JWT_SECRET)
+    throw new Error("JWT_SECRET is not defined in environment variables");
+  return jwt.sign(user, process.env.JWT_SECRET, accessTokenOptions);
+};
+
+export const generateRefreshToken = (user: { userId: string }): string => {
+  if (!process.env.JWT_REFRESH_SECRET)
+    throw new Error(
+      "JWT_REFRESH_SECRET is not defined in environment variables"
+    );
+  return jwt.sign(user, process.env.JWT_REFRESH_SECRET, refreshTokenOptions);
+};
+
+export const getAccessToken = (req: Request): string | undefined => {
   if (req.cookies) {
     const authHeader = req.cookies["Authorization"];
     if (authHeader) {
-      return decodeURIComponent(authHeader.replace("Bearer%20", "")).split(" ")[1];
+      return decodeURIComponent(authHeader.replace("Bearer%20", "")).split(
+        " "
+      )[1];
     }
   }
 };
 
-export const auth = (req: Request): boolean => {
+export const verifyAccessToken = (token: string): { userId: string } | null => {
   try {
-    const token = getToken(req);
-    if (!token) return false;
+    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is missing");
+    return jwt.verify(token, process.env.JWT_SECRET) as { userId: string };
+  } catch (error) {
+    return null;
+  }
+};
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing.");
+export const verifyRefreshToken = (
+  token: string
+): { userId: string } | null => {
+  try {
+    if (!process.env.JWT_REFRESH_SECRET)
+      throw new Error("JWT_REFRESH_SECRET is missing");
+    return jwt.verify(token, process.env.JWT_REFRESH_SECRET) as {
+      userId: string;
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const auth = (req: Request, res: Response): boolean => {
+  try {
+    const authHeader = req.cookies?.Authorization;
+    if (!authHeader) {
+      res.status(401).json({ error: "Unauthorized" });
+      return false;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string, options) as { userId: string };
+    let token = authHeader.replace("Bearer ", "");
+    let decoded = verifyAccessToken(token);
 
+    if (!decoded) {
+      const refreshToken = req.cookies?.refreshToken;
+      if (!refreshToken) {
+        res.status(401).json({ error: "Unauthorized" });
+        return false;
+      }
 
-    if (!decoded?.userId) return false;
+      const refreshDecoded = verifyRefreshToken(refreshToken);
+      if (!refreshDecoded) {
+        res.status(403).json({ error: "Invalid refresh token" });
+        return false;
+      }
+
+      const newAccessToken = generateAccessToken({
+        userId: refreshDecoded.userId,
+      });
+      res.cookie("Authorization", `Bearer ${newAccessToken}`);
+
+      decoded = refreshDecoded;
+    }
+
+    (req as any).user = decoded;
 
     console.log("User is authenticated");
     return true;

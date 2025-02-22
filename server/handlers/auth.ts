@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-const { auth } = require("./authUtils");
+import { auth } from "./authUtils";
 
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   if (req.url === "/register" || req.url === "/login") {
     res.clearCookie("Authorization", {
       path: "/",
@@ -11,9 +15,7 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     return next();
   }
 
-  if (auth(req)) return next();
-
-  res.status(401).send("Unauthorized");
+  if (auth(req, res)) return next();
 };
 
 export default authMiddleware;
