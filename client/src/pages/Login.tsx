@@ -49,7 +49,7 @@ export default function AuthPage() {
       if (error.status === 401) {
         setGeneralError("Incorrect credentials");
       } else {
-        setGeneralError("Internal error");
+        setGeneralError(error.response.data.error || "Internal error");
       }
     }
   };

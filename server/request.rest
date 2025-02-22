@@ -24,7 +24,7 @@ POST http://localhost:3000/users/logout
 GET http://localhost:3000/users
 
 ### Get User by ID
-GET http://localhost:3000/users/677ee9300c6a8d45bff43186
+GET http://localhost:3000/users/67b30cba842354643f85919a
 
 ### Update User by ID
 PUT http://localhost:3000/users/6792a7d8945ef7d79906413b
