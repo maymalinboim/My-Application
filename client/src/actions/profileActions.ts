@@ -6,9 +6,12 @@ export const getUser = async (token: string) => {
   const { userId } = decodeToken(token);
   console.log("userId:", userId);
 
-  const res = await axios.get(`${config.SERVER_URL}/users/${userId}`);
-
-  console.log(res);
+  const res = await axios.get(`${config.SERVER_URL}/users/${userId}`,
+    {
+      withCredentials: true,
+    }
+  );
+  
   return res;
 };
 

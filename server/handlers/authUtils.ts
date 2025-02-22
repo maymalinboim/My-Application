@@ -7,6 +7,7 @@ export const generateToken = (username: { userId: string }): string => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined in environment variables");
   }
+
   return jwt.sign(username, process.env.JWT_SECRET, options);
 };
 
@@ -14,9 +15,7 @@ export const getToken = (req: Request): string | undefined => {
   if (req.cookies) {
     const authHeader = req.cookies["Authorization"];
     if (authHeader) {
-      return decodeURIComponent(authHeader.replace("Bearer%20", ""))
-        .split(" ")[1]
-        .slice(0, -1);
+      return decodeURIComponent(authHeader.replace("Bearer%20", "")).split(" ")[1];
     }
   }
 };
@@ -24,16 +23,14 @@ export const getToken = (req: Request): string | undefined => {
 export const auth = (req: Request): boolean => {
   try {
     const token = getToken(req);
-    console.log("token: ", token);
     if (!token) return false;
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string,
-      options
-    ) as {
-      userId: string;
-    };
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is missing.");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string, options) as { userId: string };
+
 
     if (!decoded?.userId) return false;
 
