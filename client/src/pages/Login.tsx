@@ -32,7 +32,7 @@ export default function AuthPage() {
     const token = Cookies.get("Authorization") || "";
 
     if (isTokenValid(token)) {
-      navigate("/profile");
+      navigate("/home");
     }
   };
 

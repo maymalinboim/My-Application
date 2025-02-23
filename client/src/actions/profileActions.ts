@@ -4,14 +4,10 @@ import axios from "axios";
 
 export const getUser = async (token: string) => {
   const { userId } = decodeToken(token);
-  console.log("userId:", userId);
+  const res = await axios.get(`${config.SERVER_URL}/users/${userId}`, {
+    withCredentials: true,
+  });
 
-  const res = await axios.get(`${config.SERVER_URL}/users/${userId}`,
-    {
-      withCredentials: true,
-    }
-  );
-  
   return res;
 };
 
@@ -27,6 +23,6 @@ export const updateUser = async (token: string, newUsername: string) => {
       withCredentials: true,
     }
   );
-  console.log(res);
+
   return res.status === 201;
 };

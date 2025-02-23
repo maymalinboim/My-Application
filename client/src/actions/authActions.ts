@@ -33,3 +33,14 @@ export const registerUser = async (
   );
   return res.status === 201;
 };
+
+export const logoutUser = async () => {
+  const res = await axios.post(
+    `${config.SERVER_URL}/users/logout`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
+  return res.status === 200;
+};

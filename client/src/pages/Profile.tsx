@@ -59,7 +59,7 @@ export default function ProfilePage() {
     const currentUser = await getUser(token);
     setUser(currentUser.data);
     console.log(user);
-  }
+  };
 
   const handleUsernameUpdate = () => {
     setUser({ ...user, username: newUser.username });
@@ -75,7 +75,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-6 space-x-8 flex w-full justify-around">
+    <div className="p-6 space-x-8 flex h-full w-full justify-around">
       <Card className="h-fit w-1/2">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -93,7 +93,9 @@ export default function ProfilePage() {
                 id="username"
                 value={newUser.username}
                 placeholder={user.username}
-                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, username: e.target.value })
+                }
               />
             </div>
             <div>
@@ -102,7 +104,9 @@ export default function ProfilePage() {
                 id="email"
                 value={newUser.email}
                 placeholder={user.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
               />
             </div>
             <div>
@@ -112,7 +116,9 @@ export default function ProfilePage() {
                 type="password"
                 value={newUser.password}
                 placeholder={"**********"}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
               />
             </div>
             {/* <div>
