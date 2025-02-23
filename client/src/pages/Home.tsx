@@ -18,5 +18,5 @@ export default function HomePage() {
     }
   };
 
-  return <div>Home Page</div>;
+  return <div className="h-full w-full">Home Page</div>;
 }
