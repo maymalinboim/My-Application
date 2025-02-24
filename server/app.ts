@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -9,6 +9,9 @@ import usersRoute from "./routes/usersRoute";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swaggerConfig";
 import cors from "cors";
+import expressSession from "express-session";
+import passport from "passport";
+import googleRoute from "./routes/googleRoute";
 
 dotenv.config();
 const app = express();
@@ -18,12 +21,23 @@ const corsOptions: cors.CorsOptions = {
   credentials: true,
 };
 
+const expressSessionOptions = {
+  secret: process.env.SESSION_SECRET || "mysecret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false },
+};
+
 // Middlewares
 app.use(cors(corsOptions));
+app.use(expressSession(expressSessionOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(passport.initialize());
 
+// Routes
+app.use("/auth", googleRoute);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/users", usersRoute);
