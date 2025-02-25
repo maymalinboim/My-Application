@@ -16,6 +16,7 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        let userId;
         const email = profile.emails?.[0]?.value;
         const username = email?.split("@")[0];
 
@@ -31,9 +32,12 @@ passport.use(
         if (!existingUser) {
           const newUser = new User(user);
           await newUser.save();
+          userId = newUser._id.toString();
+        } else {
+          userId = existingUser._id.toString();
         }
 
-        return done(null, user);
+        return done(null, { ...user, userId });
       } catch (error) {
         return done(error, false);
       }
