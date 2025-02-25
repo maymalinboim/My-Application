@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 interface User {
   username: string;
   email: string;
-  password: string;
+  password?: string;
   profilePhoto: string;
 }
 
@@ -109,18 +109,20 @@ export default function ProfilePage() {
                 }
               />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={newUser.password}
-                placeholder={"**********"}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, password: e.target.value })
-                }
-              />
-            </div>
+            {newUser?.password && (
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newUser.password}
+                  placeholder={"**********"}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, password: e.target.value })
+                  }
+                />
+              </div>
+            )}
             {/* <div>
               <Label htmlFor="photo">Update Photo:</Label>
               <Input id="photo" type="file" onChange={handlePhotoUpdate} />

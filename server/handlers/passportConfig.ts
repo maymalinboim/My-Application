@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
+import { User } from "../db/dbUtils";
 
 dotenv.config();
 
@@ -15,13 +16,23 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Here, you would check if the user exists in your database
-        // and create a new user if necessary
+        const email = profile.emails?.[0]?.value;
+        const username = email?.split("@")[0];
+
+        const existingUser = await User.findOne({
+          $or: [{ username }, { email }],
+        });
+
         const user = {
-          googleId: profile.id,
-          displayName: profile.displayName,
-          email: profile.emails?.[0]?.value,
+          username,
+          email,
         };
+
+        if (!existingUser) {
+          const newUser = new User(user);
+          await newUser.save();
+        }
+
         return done(null, user);
       } catch (error) {
         return done(error, false);
