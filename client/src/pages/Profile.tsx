@@ -8,6 +8,15 @@ import { getUser } from "@/actions/profileActions";
 import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { useNavigate } from "react-router-dom";
+import { getPostsBySender } from "@/actions/postsActions";
+import Posts, { Post } from "@/components/Posts";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import CommentSection from "@/components/Comments";
 
 interface User {
   username: string;
@@ -23,28 +32,27 @@ const initialUser: User = {
   profilePhoto: "",
 };
 
-const userPosts = [
-  "Just finished a new project!",
-  "Exploring the mountains this weekend.",
-  "React + Tailwind = ❤️",
-];
-
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User>(initialUser);
   const [newUser, setNewUser] = useState<User>(user);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
 
   useEffect(() => {
     validateToken();
   }, [navigate]);
 
   useEffect(() => {
-    getUserDetails();
+    const fetchData = async () => {
+      const token = Cookies.get("Authorization") || "";
+      const currentUser = await getUser(token);
+      setUser(currentUser.data);
+      const userPosts = await getPostsBySender(token);
+      setUserPosts(userPosts);
+    };
+    fetchData();
   }, []);
-
-  useEffect(() => {
-    console.log(newUser);
-  }, [newUser]);
 
   const validateToken = () => {
     const token = Cookies.get("Authorization") || "";
@@ -52,13 +60,6 @@ export default function ProfilePage() {
     if (!isTokenValid(token)) {
       navigate("/");
     }
-  };
-
-  const getUserDetails = async () => {
-    const token = Cookies.get("Authorization") || "";
-    const currentUser = await getUser(token);
-    setUser(currentUser.data);
-    console.log(user);
   };
 
   const handleUsernameUpdate = () => {
@@ -75,7 +76,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-6 space-x-8 flex h-full w-full justify-around">
+    <div className="p-6 space-x-8 flex h-fit w-full justify-around">
       <Card className="h-fit w-1/2">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -135,28 +136,30 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Card className="w-1/2">
+      <Card className="w-1/2 h-full">
         <CardHeader>
           <CardTitle>Your Posts</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {userPosts.map((post, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-100 rounded-lg flex items-center flex-col"
-              >
-                <img
-                  src="https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg"
-                  height={200}
-                  width={100}
-                />
-                {post}
-              </div>
+            {userPosts.map((post) => (
+              <Posts key={post._id} setOpenPostId={setOpenPostId} post={post} />
             ))}
           </div>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={Boolean(openPostId)}
+        onOpenChange={() => setOpenPostId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+          </DialogHeader>
+          {openPostId && <CommentSection postId={openPostId} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
