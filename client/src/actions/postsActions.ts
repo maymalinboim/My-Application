@@ -1,8 +1,19 @@
 import config from "@/config";
+import { decodeToken } from "@/utils/authUtils";
 import axios from "axios";
 
 export const getAllPosts = async () => {
   const res = await axios.get(`${config.SERVER_URL}/posts`, {
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+export const getPostsBySender = async (token: string) => {
+  const { userId } = decodeToken(token);
+
+  const res = await axios.get(`${config.SERVER_URL}/posts/sender/${userId}`, {
     withCredentials: true,
   });
 

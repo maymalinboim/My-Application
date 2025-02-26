@@ -32,7 +32,8 @@ export default function Posts({
         className="rounded-lg"
       />
       <p className="text-gray-700">{post.body}</p>
-      <p className="text-sm text-gray-500">Author: {post.author}</p>
+      <p className="text-sm text-gray-500">Author: {post._id}</p>
+      {/* should be post.author but some objects don't have and it crushes for some reason */}
       <div className="flex items-center space-x-4 mt-2">
         <div className="flex items-center space-x-1 cursor-pointer">
           <Heart className="w-5 h-5 text-red-500" />
@@ -44,6 +45,7 @@ export default function Posts({
         >
           <MessageCircle className="w-5 h-5 text-blue-500" />
           <span>{post.comments.length}</span>
+          {/* comments length doesn't update when adding a comment */}
         </div>
       </div>
     </div>
