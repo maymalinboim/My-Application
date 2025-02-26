@@ -75,7 +75,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-6 space-x-8 flex h-full w-full justify-around">
+    <div className="p-6 space-x-8 flex h-fit w-full justify-around">
       <Card className="h-fit w-1/2">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
