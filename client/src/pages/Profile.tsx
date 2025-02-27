@@ -10,12 +10,6 @@ import { isTokenValid } from "@/utils/authUtils";
 import { useNavigate } from "react-router-dom";
 import { getPostsBySender } from "@/actions/postsActions";
 import Posts, { Post } from "@/components/Posts";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import CommentSection from "@/components/Comments";
 
 interface User {
@@ -149,17 +143,9 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Dialog
-        open={Boolean(openPostId)}
-        onOpenChange={() => setOpenPostId(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Comments</DialogTitle>
-          </DialogHeader>
-          {openPostId && <CommentSection postId={openPostId} />}
-        </DialogContent>
-      </Dialog>
+      {openPostId && (
+        <CommentSection postId={openPostId} setOpen={setOpenPostId} />
+      )}
     </div>
   );
 }

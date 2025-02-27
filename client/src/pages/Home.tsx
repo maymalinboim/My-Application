@@ -3,18 +3,16 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { getAllPosts } from "@/actions/postsActions";
 import Posts, { Post } from "@/components/Posts";
 import CommentSection from "@/components/Comments";
+import CreatePostModal from "@/components/CreatePost";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const [openCreate, setOpenCreate] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const navigate = useNavigate();
 
@@ -38,8 +36,13 @@ export default function HomePage() {
     }
   };
 
+  const handleCreatePost = (newPost: Post) => {
+    setAllPosts([newPost, ...allPosts]);
+    setOpenCreate(false);
+  };
+
   return (
-    <div className="h-fit w-full flex justify-center">
+    <div className="h-fit w-full flex justify-center relative">
       <Card className="w-3/4 h-full">
         <CardHeader>
           <CardTitle>All Posts</CardTitle>
@@ -47,23 +50,28 @@ export default function HomePage() {
         <CardContent>
           <div className="space-y-4">
             {allPosts.map((post) => (
-              <Posts setOpenPostId={setOpenPostId} post={post} />
+              <Posts key={post._id} setOpenPostId={setOpenPostId} post={post} />
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <Dialog
-        open={Boolean(openPostId)}
-        onOpenChange={() => setOpenPostId(null)}
+      <Button
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg bg-blue-500 hover:bg-blue-600 text-white"
+        onClick={() => setOpenCreate(true)}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Comments</DialogTitle>
-          </DialogHeader>
-          {openPostId && <CommentSection postId={openPostId} />}
-        </DialogContent>
-      </Dialog>
+        <Plus className="w-6 h-6" />
+      </Button>
+
+      <CreatePostModal
+        open={openCreate}
+        setOpen={setOpenCreate}
+        onCreate={handleCreatePost}
+      />
+
+      {openPostId && (
+        <CommentSection postId={openPostId} setOpen={setOpenPostId} />
+      )}
     </div>
   );
 }

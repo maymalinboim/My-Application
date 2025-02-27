@@ -20,6 +20,21 @@ export const getPostsBySender = async (token: string) => {
   return res.data;
 };
 
+export const createPost = async (title: string, body: string) => {
+  const res = await axios.post(
+    `${config.SERVER_URL}/posts`,
+    {
+      title,
+      body,
+    },
+    {
+      withCredentials: true,
+    }
+  );
+
+  return res.data;
+};
+
 export const getCommentsByPost = async (postId: string) => {
   const res = await axios.get(
     `${config.SERVER_URL}/comments/postId/${postId}`,
