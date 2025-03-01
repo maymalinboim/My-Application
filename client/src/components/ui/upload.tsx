@@ -8,8 +8,6 @@ interface UploadProfileProps {
 }
 
 const UploadProfile: React.FC<UploadProfileProps> = ({ username, setImage, imageUrl }) => {
-  console.log(imageUrl);
-  
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

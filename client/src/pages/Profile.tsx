@@ -75,12 +75,7 @@ export default function ProfilePage() {
   const getUserDetails = async () => {
     const currentUser = await getUser(token);
     const { username, email, password, profilePhoto } = currentUser.data;
-    console.log(config.SERVER_URL);
-    console.log(profilePhoto);
-    
     setUser({ username, email, password, profilePhotoUrl: `${config.SERVER_URL}/${profilePhoto}` });
-    console.log(`${config.SERVER_URL}/${profilePhoto}`);
-    
   }
 
   const handleSave = () => {

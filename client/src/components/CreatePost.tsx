@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createPost } from "@/actions/postsActions";
+import UploadImage from "./UploadImage";
 
 export interface NewPost {
   title: string;
   body: string;
-  image?: string; //link?
+  image?: string;
 }
 
 export default function CreatePostModal({
@@ -29,6 +30,7 @@ export default function CreatePostModal({
     title: "",
     body: "",
   });
+  const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -36,17 +38,10 @@ export default function CreatePostModal({
     if (!title || !body) return alert("Title and body are required!");
 
     setLoading(true);
-    const newPost = await createPost(title, body);
+    const newPost = await createPost(title, body, image);
     setLoading(false);
     onCreate(newPost);
     setOpen(false);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPostDetails({ ...postDetails, image: URL.createObjectURL(file) });
-    }
   };
 
   return (
@@ -72,16 +67,7 @@ export default function CreatePostModal({
           }
         />
 
-        <Input type="file" accept="image/*" onChange={handleImageUpload} />
-
-        {postDetails.image && (
-          <img
-            src={postDetails.image}
-            alt="Preview"
-            className="w-fit h-40 object-cover rounded-lg mt-2"
-          />
-        )}
-
+       <UploadImage setImage={setImage}/>
         <Button onClick={handleSubmit} disabled={loading}>
           {loading ? "Posting..." : "Create Post"}
         </Button>
