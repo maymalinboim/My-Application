@@ -2,25 +2,26 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import UploadProfile from "@/components/ui/upload";
 import { Label } from "@/components/ui/label";
-import { getUser } from "@/actions/profileActions";
+import { getUser, updateUser } from "@/actions/profileActions";
 import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { useNavigate } from "react-router-dom";
+import config from "@/config";
 
 interface User {
   username: string;
   email: string;
   password: string;
-  profilePhoto: string;
+  profilePhotoUrl?: string;
 }
 
 const initialUser: User = {
   username: "",
   email: "",
   password: "",
-  profilePhoto: "",
+  profilePhotoUrl: "",
 };
 
 const userPosts = [
@@ -32,7 +33,9 @@ const userPosts = [
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User>(initialUser);
-  const [newUser, setNewUser] = useState<User>(user);
+  const [newUsername, setNewUsername] = useState<string>(user.username);
+  const [image, setImage] = useState<File | null>(null);
+  const token = Cookies.get("Authorization") || "";
 
   useEffect(() => {
     validateToken();
@@ -42,37 +45,50 @@ export default function ProfilePage() {
     getUserDetails();
   }, []);
 
-  useEffect(() => {
-    console.log(newUser);
-  }, [newUser]);
-
   const validateToken = () => {
-    const token = Cookies.get("Authorization") || "";
-
     if (!isTokenValid(token)) {
       navigate("/");
     }
   };
 
   const getUserDetails = async () => {
-    const token = Cookies.get("Authorization") || "";
     const currentUser = await getUser(token);
-    setUser(currentUser.data);
-    console.log(user);
+    const { username, email, password, profilePhoto } = currentUser.data;
+    setUser({ username, email, password, profilePhotoUrl: `${config.SERVER_URL}/${profilePhoto}` });
   }
 
-  const handleUsernameUpdate = () => {
-    setUser({ ...user, username: newUser.username });
-    alert("Username updated!");
-  };
-
-  const handlePhotoUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUser({ ...user, profilePhoto: imageUrl });
+  const handleSave = () => {
+    if (newUsername || image) {
+      updateUser(token, newUsername, image);
+      getUserDetails();
     }
-  };
+  }
+
+  // const handleUpload = async () => {
+  //   if (!image) return alert("Please select an image");
+
+  //   setUploading(true);
+  //   const formData = new FormData();
+  //   formData.append("profileImage", image);
+
+  //   try {
+  //     const response = await axios.post<{ imageUrl: string }>(
+  //       `${config.SERVER_URL}/api/upload`,
+  //       formData,
+  //       {
+  //         headers: { "Content-Type": "multipart/form-data" },
+  //       }
+  //     );
+
+  //     alert("Image uploaded successfully!");
+  //     console.log("Image URL:", response.data.imageUrl);
+  //   } catch (error) {
+  //     console.error("Upload failed", error);
+  //     alert("Upload failed!");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   return (
     <div className="p-6 space-x-8 flex w-full justify-around">
@@ -81,38 +97,23 @@ export default function ProfilePage() {
           <CardTitle>Profile</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-3 justify-around">
-          <Avatar className="w-32 h-32">
-            <AvatarImage src={user.profilePhoto} alt="Profile Photo" />
-            <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-
+          <UploadProfile username={user.username} setImage={setImage} imageUrl={user.profilePhotoUrl} />
           <div className="space-y-4 w-1/2">
             <div>
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                value={newUser.username}
+                value={newUsername}
                 placeholder={user.username}
-                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                onChange={(e) => setNewUsername(e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                value={newUser.email}
-                placeholder={user.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={newUser.password}
-                placeholder={"**********"}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                value={user.email}
+                disabled
               />
             </div>
             {/* <div>
@@ -120,7 +121,7 @@ export default function ProfilePage() {
               <Input id="photo" type="file" onChange={handlePhotoUpdate} />
             </div> */}
 
-            <Button className="w-full" onClick={handleUsernameUpdate}>
+            <Button className="w-full" onClick={handleSave} disabled={newUsername || image ? false : true}>
               Save Changes
             </Button>
           </div>

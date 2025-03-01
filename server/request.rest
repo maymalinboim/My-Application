@@ -5,7 +5,8 @@ Content-Type: application/json
 {
   "username": "morimori2",
   "email": "mori22@gmail.com",
-  "password": "456"
+  "password": "456",
+  "profilePhoto": "images/dog-8198719_640.jpg",
 }
 
 ### Login
