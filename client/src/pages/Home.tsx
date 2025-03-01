@@ -9,11 +9,14 @@ import CommentSection from "@/components/Comments";
 import CreatePostModal from "@/components/CreatePost";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Paging from "@/components/Paging";
 
 export default function HomePage() {
   const [openPostId, setOpenPostId] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 8;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +44,10 @@ export default function HomePage() {
     setOpenCreate(false);
   };
 
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = allPosts.slice(indexOfFirstPost, indexOfLastPost);
+
   return (
     <div className="h-fit w-full flex justify-center relative">
       <Card className="w-3/4 h-full">
@@ -49,10 +56,16 @@ export default function HomePage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {allPosts.map((post) => (
+            {currentPosts.map((post) => (
               <Posts key={post._id} setOpenPostId={setOpenPostId} post={post} />
             ))}
           </div>
+          <Paging
+            posts={allPosts}
+            postsPerPage={postsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </CardContent>
       </Card>
 

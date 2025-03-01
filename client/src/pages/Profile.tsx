@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { getPostsBySender } from "@/actions/postsActions";
 import Posts, { Post } from "@/components/Posts";
 import CommentSection from "@/components/Comments";
+import Paging from "@/components/Paging";
 
 interface User {
   username: string;
@@ -32,6 +33,8 @@ export default function ProfilePage() {
   const [newUser, setNewUser] = useState<User>(user);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
 
   useEffect(() => {
     validateToken();
@@ -61,13 +64,17 @@ export default function ProfilePage() {
     alert("Username updated!");
   };
 
-  const handlePhotoUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUser({ ...user, profilePhoto: imageUrl });
-    }
-  };
+  // const handlePhotoUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const imageUrl = URL.createObjectURL(file);
+  //     setUser({ ...user, profilePhoto: imageUrl });
+  //   }
+  // };
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = userPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   return (
     <div className="p-6 space-x-8 flex h-fit w-full justify-around">
@@ -136,10 +143,16 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {userPosts.map((post) => (
+            {currentPosts.map((post) => (
               <Posts key={post._id} setOpenPostId={setOpenPostId} post={post} />
             ))}
           </div>
+          <Paging
+            posts={userPosts}
+            postsPerPage={postsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </CardContent>
       </Card>
 
