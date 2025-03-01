@@ -1,0 +1,110 @@
+### Register new User
+POST http://localhost:3000/users/register
+Content-Type: application/json
+
+{
+  "username": "morimori2",
+  "email": "mori22@gmail.com",
+  "password": "456",
+  "profilePhoto": "images/dog-8198719_640.jpg",
+}
+
+### Login
+POST http://localhost:3000/users/login
+Content-Type: application/json
+
+{
+  "username": "maymay991",
+  "password": "123"
+}
+
+### Logout
+POST http://localhost:3000/users/logout
+
+### Get All Users
+GET http://localhost:3000/users
+
+### Get User by ID
+GET http://localhost:3000/users/67b30cba842354643f85919a
+
+### Update User by ID
+PUT http://localhost:3000/users/6792a7d8945ef7d79906413b
+Content-Type: application/json
+
+{
+  "username": "maymay88",
+  "email": "mayay8910@gmail.com",
+  "password": "1234"
+}
+
+### Delete User by ID
+DELETE http://localhost:3000/users/6792a7d8945ef7d79906413b
+
+### Create a New Post
+POST http://localhost:3000/posts
+Content-Type: application/json
+
+{
+  "title": "My New Post4",
+  "body": "post!"
+  }
+
+### Get All Posts
+GET http://localhost:3000/posts
+
+### Get Posts by author
+GET http://localhost:3000/posts/sender/677ee9300c6a8d45bff43186
+
+### Get Post by ID
+GET http://localhost:3000/posts/67685c2bf888889ca9c44099
+
+### Update Post by ID
+PUT http://localhost:3000/posts/678531d2c02c815f774f9590
+Content-Type: application/json
+
+{
+  "title": "Updated Post Title0000",
+  "body": "Updated content0000 of the post"
+}
+
+### Delete Post by ID
+DELETE http://localhost:3000/posts/678531d2c02c815f774f9590
+
+### Create a New Comment for a Post
+POST http://localhost:3000/comments
+Content-Type: application/json
+
+{
+  "body": "new comment!",
+  "postId": "676854fc5fd77d670d3cbbb5"
+}
+
+### Update Comment by ID
+PUT http://localhost:3000/comments/6792ad75f931781a756294af
+Content-Type: application/json
+
+{
+  "body": "new comment?!!!",
+  "postId": "676854fc5fd77d670d3cbbb5"
+}
+
+### Delete Comment by ID
+DELETE http://localhost:3000/comments
+Content-Type: application/json
+
+{
+  "id": "6792ad75f931781a756294af",
+  "postId": "676854fc5fd77d670d3cbbb5"
+}
+
+### Get All Comments
+GET http://localhost:3000/comments
+
+### Get Comment by ID
+GET http://localhost:3000/comments/commentId/?id=677eecd4ed486aa4381b35bb&postId=676854fc5fd77d670d3cbbb5
+
+### Get All Comments for a Specific Post
+GET http://localhost:3000/comments/postId/676854fc5fd77d670d3cbbb5
+
+
+
