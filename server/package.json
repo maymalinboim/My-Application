@@ -4,6 +4,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
+    "start": "ts-node app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +12,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@types/cors": "^2.8.17",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cookie": "^1.0.2",
@@ -22,23 +22,28 @@
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
+    "multer": "^1.4.5-lts.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/body-parser": "^1.19.5",
     "@types/cookie": "^0.6.0",
     "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.1",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.10.9",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/swagger-jsdoc": "^6.0.4",
-    "@types/swagger-ui-express": "^4.1.7"
+    "@types/swagger-ui-express": "^4.1.7",
+    "@types/uuid": "^10.0.0"
   }
 }

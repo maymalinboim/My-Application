@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import jwt from "jsonwebtoken";
+import upload from "../handlers/uploadUtils";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -48,7 +49,7 @@ router.use(authMiddleware);
 // REGISTER
 router.post("/register", async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, profilePhoto } = req.body;
     if (!username || !email || !password) {
       res.status(400).send({ error: "Please provide all fields" });
       return;
@@ -61,7 +62,14 @@ router.post("/register", async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
+
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      profilePhoto,
+    });
+
     const user = await newUser.save();
     const userId = user._id.toString();
 
@@ -305,9 +313,10 @@ router.get("/:id", async (req: Request, res: Response) => {
  *         description: Error occurred during update.
  */
 // UPDATE USER BY ID
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", upload.single("profileImage"), async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
+    const profilePhoto = `${req.file?.destination}${req.file?.filename}`;
     const id = req.params.id;
 
     if (!id) {
@@ -317,12 +326,15 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const updateData: { username?: string; email?: string; password?: string } =
+    const updateData: { username?: string; email?: string; password?: string, profilePhoto?: string } =
       {};
     if (username) updateData.username = username;
     if (email) updateData.email = email;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    if (password) updateData.password = hashedPassword;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+    if (profilePhoto) updateData.profilePhoto = profilePhoto;
 
     const userToUpdate = await User.findOne({ _id: id });
 

@@ -9,6 +9,7 @@ import usersRoute from "./routes/usersRoute";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swaggerConfig";
 import cors from "cors";
+import path from "path";
 import expressSession from "express-session";
 import passport from "passport";
 import googleRoute from "./routes/googleRoute";
@@ -41,6 +42,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/users", usersRoute);
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -11,17 +11,20 @@ export const getUser = async (token: string) => {
   return res;
 };
 
-export const updateUser = async (token: string, newUsername: string) => {
+export const updateUser = async (token: string, username: string, profilePhoto: File | null) => {
   const { userId } = decodeToken(token);
+
+  const formData = new FormData();
+  profilePhoto && formData.append("profileImage", profilePhoto);
+  formData.append("username", username);
 
   const res = await axios.put(
     `${config.SERVER_URL}/users/${userId}`,
+    formData,
     {
-      newUsername,
-    },
-    {
+      headers: { "Content-Type": "multipart/form-data" },
       withCredentials: true,
-    }
+    },
   );
 
   return res.status === 201;
