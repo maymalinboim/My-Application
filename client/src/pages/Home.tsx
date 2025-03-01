@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import Paging from "@/components/Paging";
 
 export default function HomePage() {
-  const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const [openComment, setOpenComment] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +57,11 @@ export default function HomePage() {
         <CardContent>
           <div className="space-y-4">
             {currentPosts.map((post) => (
-              <Posts key={post._id} setOpenPostId={setOpenPostId} post={post} />
+              <Posts
+                key={post._id}
+                setOpenComment={setOpenComment}
+                post={post}
+              />
             ))}
           </div>
           <Paging
@@ -82,8 +86,8 @@ export default function HomePage() {
         onCreate={handleCreatePost}
       />
 
-      {openPostId && (
-        <CommentSection postId={openPostId} setOpen={setOpenPostId} />
+      {openComment && (
+        <CommentSection postId={openComment} setOpen={setOpenComment} />
       )}
     </div>
   );

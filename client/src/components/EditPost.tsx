@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,22 +8,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { createPost } from "@/actions/postsActions";
+import { editPost, getPostsById } from "@/actions/postsActions";
+import { NewPost } from "./CreatePost";
 
-export interface NewPost {
-  title: string;
-  body: string;
-  image?: string; //link?
-}
-
-export default function CreatePostModal({
-  open,
+export default function EditPostModal({
+  postId,
   setOpen,
-  onCreate,
+  fetchPosts,
 }: {
-  open: boolean;
-  setOpen: (state: boolean) => void;
-  onCreate: (newPost: any) => void;
+  postId: string;
+  setOpen: (state: string | null) => void;
+  fetchPosts: () => void;
 }) {
   const [postDetails, setPostDetails] = useState<NewPost>({
     title: "",
@@ -31,15 +26,23 @@ export default function CreatePostModal({
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchPostDetails = async () => {
+      const post = await getPostsById(postId);
+      const { title, body } = post;
+      setPostDetails({ title, body });
+    };
+    fetchPostDetails();
+  }, []);
+
   const handleSubmit = async () => {
     const { title, body } = postDetails;
-    if (!title || !body) return alert("Title and body are required!");
 
     setLoading(true);
-    const newPost = await createPost(title, body);
+    await editPost(postId, title, body);
+    await fetchPosts();
     setLoading(false);
-    onCreate(newPost);
-    setOpen(false);
+    setOpen(null);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,10 +53,10 @@ export default function CreatePostModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={Boolean(postId)} onOpenChange={() => setOpen(null)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create a New Post</DialogTitle>
+          <DialogTitle>Edit post</DialogTitle>
         </DialogHeader>
 
         <Input
@@ -83,7 +86,7 @@ export default function CreatePostModal({
         )}
 
         <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Posting..." : "Create Post"}
+          {loading ? "Updating..." : "Edit Post"}
         </Button>
       </DialogContent>
     </Dialog>

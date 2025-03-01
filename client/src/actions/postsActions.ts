@@ -20,6 +20,14 @@ export const getPostsBySender = async (token: string) => {
   return res.data;
 };
 
+export const getPostsById = async (postId: string) => {
+  const res = await axios.get(`${config.SERVER_URL}/posts/${postId}`, {
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
 export const createPost = async (title: string, body: string) => {
   const res = await axios.post(
     `${config.SERVER_URL}/posts`,
@@ -31,6 +39,29 @@ export const createPost = async (title: string, body: string) => {
       withCredentials: true,
     }
   );
+
+  return res.data;
+};
+
+export const editPost = async (postId: string, title: string, body: string) => {
+  const res = await axios.put(
+    `${config.SERVER_URL}/posts/${postId}`,
+    {
+      title,
+      body,
+    },
+    {
+      withCredentials: true,
+    }
+  );
+
+  return res.data;
+};
+
+export const deletePost = async (postId: string) => {
+  const res = await axios.delete(`${config.SERVER_URL}/posts/${postId}`, {
+    withCredentials: true,
+  });
 
   return res.data;
 };
