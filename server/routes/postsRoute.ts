@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import { Post, User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import { getToken, options } from "../handlers/authUtils";
 import jwt from "jsonwebtoken";
 import { IPost, IUser } from "../models/models";
+import { getAccessToken, verifyAccessToken } from "../handlers/authUtils";
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -54,8 +54,8 @@ router.post("/", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
     const user = await User.findById(userId);
 
     if (!user) {
@@ -77,7 +77,9 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(201).send(newPost);
   } catch (error) {
     console.error("Error creating post:", error);
-    res.status(500).send({ error: "An error occurred while creating the post" });
+    res
+      .status(500)
+      .send({ error: "An error occurred while creating the post" });
   }
 });
 
@@ -218,7 +220,9 @@ router.get("/:id", async (req: Request, res: Response) => {
     res.status(200).send(found);
   } catch (error) {
     console.error("Error fetching post by ID:", error);
-    res.status(500).send({ error: "An error occurred while fetching the post" });
+    res
+      .status(500)
+      .send({ error: "An error occurred while fetching the post" });
   }
 });
 
@@ -266,7 +270,9 @@ router.put("/:id", async (req: Request, res: Response) => {
     const id = req.params.id;
 
     if (!title || !body || !id) {
-      res.status(400).send({ error: "Please provide post id and update details" });
+      res
+        .status(400)
+        .send({ error: "Please provide post id and update details" });
       return;
     }
 
@@ -281,8 +287,8 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
 
     if (postToUpdate.author._id.toString() !== userId) {
       res.status(401).send({ error: "No permission to update this post" });
@@ -296,7 +302,9 @@ router.put("/:id", async (req: Request, res: Response) => {
     res.status(200).send(updated);
   } catch (error) {
     console.error("Error updating post:", error);
-    res.status(500).send({ error: "An error occurred while updating the post" });
+    res
+      .status(500)
+      .send({ error: "An error occurred while updating the post" });
   }
 });
 
@@ -342,8 +350,8 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
 
     if (postToDelete.author._id.toString() !== userId) {
       res.status(401).send({ error: "No permission to delete this post" });
@@ -359,7 +367,9 @@ router.delete("/:id", async (req: Request, res: Response) => {
     res.status(200).send({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("Error deleting post:", error);
-    res.status(500).send({ error: "An error occurred while deleting the post" });
+    res
+      .status(500)
+      .send({ error: "An error occurred while deleting the post" });
   }
 });
 

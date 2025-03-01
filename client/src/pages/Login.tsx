@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginUser, registerUser } from "@/actions/authActions";
 import { isTokenValid } from "@/utils/authUtils";
+import { FcGoogle } from "react-icons/fc";
 
 interface AuthForm {
   username: string;
@@ -32,7 +33,7 @@ export default function AuthPage() {
     const token = Cookies.get("Authorization") || "";
 
     if (isTokenValid(token)) {
-      navigate("/profile");
+      navigate("/home");
     }
   };
 
@@ -49,9 +50,13 @@ export default function AuthPage() {
       if (error.status === 401) {
         setGeneralError("Incorrect credentials");
       } else {
-        setGeneralError("Internal error");
+        setGeneralError(error.response.data.error || "Internal error");
       }
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/auth/google";
   };
 
   const errorClass = "text-red-500 text-xs w-fit ml-1 mt-1";
@@ -103,11 +108,17 @@ export default function AuthPage() {
                 <p className={errorClass}>{errors.password.message}</p>
               )}
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full hover:border-none">
               {isLogin ? "Login" : "Register"}
             </Button>
             {generalError && <p className={errorClass}>{generalError}</p>}
           </form>
+          <Button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-2 mt-4 bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 hover:border-none"
+          >
+            <FcGoogle size={20} /> {isLogin ? "Sign in" : "Sign up"} with Google
+          </Button>
           <p className="text-center text-sm mt-4">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button

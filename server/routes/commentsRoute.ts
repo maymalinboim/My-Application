@@ -2,8 +2,8 @@ import express, { Request, Response } from "express";
 import mongoose, { ObjectId } from "mongoose";
 import { Post, User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import { options, getToken } from "../handlers/authUtils";
 import jwt from "jsonwebtoken";
+import { getAccessToken, verifyAccessToken } from "../handlers/authUtils";
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -57,8 +57,8 @@ router.post("/", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
     const user = await User.findById(userId);
 
     if (!user) {
@@ -141,8 +141,8 @@ router.put("/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
     const user = await User.findById(userId);
 
     if (!user) {
@@ -151,14 +151,10 @@ router.put("/:id", async (req: Request, res: Response) => {
     }
 
     const postToUpdate = await Post.findOne({ _id: postId });
-    const comment = postToUpdate?.comments.find(
-      (c) => c._id.toString() === id
-    );
+    const comment = postToUpdate?.comments.find((c) => c._id.toString() === id);
 
     if (!comment || userId !== comment.user.toString()) {
-      res
-        .status(401)
-        .send({ error: "No permission to update this comment" });
+      res.status(401).send({ error: "No permission to update this comment" });
       return;
     }
 
@@ -169,19 +165,10 @@ router.put("/:id", async (req: Request, res: Response) => {
       },
     };
 
-    const updateOptions = {
+    const updatedPost = await Post.findOneAndUpdate({ _id: postId }, update, {
       arrayFilters: [{ "comment._id": id }],
       returnDocument: "after",
-    };
-
-    const updatedPost = await Post.findOneAndUpdate(
-      { _id: postId },
-      update,
-      {
-        arrayFilters: [{ "comment._id": id }],
-        returnDocument: "after",
-      }
-    );
+    });
 
     if (!updatedPost) {
       res.status(404).send({ error: "Post or comment not found" });
@@ -237,14 +224,12 @@ router.delete("/", async (req: Request, res: Response) => {
     const { id, postId }: { id: string; postId: string } = req.body;
 
     if (!postId || !id) {
-      res
-        .status(400)
-        .send({ error: "Please provide comment id and postId" });
+      res.status(400).send({ error: "Please provide comment id and postId" });
       return;
     }
 
-    const token = getToken(req) || '';
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET as string, options) as jwt.JwtPayload;
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
     const user = await User.findById(userId);
 
     if (!user) {
@@ -256,9 +241,7 @@ router.delete("/", async (req: Request, res: Response) => {
     const comment = postToDelete?.comments.find((c) => c._id.toString() === id);
 
     if (!comment || userId !== comment.user.toString()) {
-      res
-        .status(401)
-        .send({ error: "No permission to delete this comment" });
+      res.status(401).send({ error: "No permission to delete this comment" });
       return;
     }
 
@@ -376,12 +359,13 @@ router.get("/", async (req: Request, res: Response) => {
 // GET COMMENT BY ID
 router.get("/commentId", async (req: Request, res: Response) => {
   try {
-    const { id, postId }: { id: string; postId: string } = req.query as { id: string; postId: string };
+    const { id, postId }: { id: string; postId: string } = req.query as {
+      id: string;
+      postId: string;
+    };
 
     if (!id || !postId) {
-      res
-        .status(400)
-        .send({ error: "Please provide comment id and postId" });
+      res.status(400).send({ error: "Please provide comment id and postId" });
       return;
     }
 

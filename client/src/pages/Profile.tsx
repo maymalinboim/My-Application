@@ -9,12 +9,24 @@ import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { useNavigate } from "react-router-dom";
 import config from "@/config";
+import { deletePost, getPostsBySender } from "@/actions/postsActions";
+import Posts, { Post } from "@/components/Posts";
+import CommentSection from "@/components/Comments";
+import Paging from "@/components/Paging";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical } from "lucide-react";
+import EditPostModal from "@/components/EditPost";
 
 interface User {
   username: string;
   email: string;
   password: string;
-  profilePhotoUrl?: string;
+  profilePhotoUrl: string;
 }
 
 const initialUser: User = {
@@ -24,25 +36,34 @@ const initialUser: User = {
   profilePhotoUrl: "",
 };
 
-const userPosts = [
-  "Just finished a new project!",
-  "Exploring the mountains this weekend.",
-  "React + Tailwind = ❤️",
-];
-
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User>(initialUser);
   const [newUsername, setNewUsername] = useState<string>(user.username);
   const [image, setImage] = useState<File | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [openComment, setOpenComment] = useState<string | null>(null);
+  const [openEdit, setOpenEdit] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const postsPerPage = 5;
   const token = Cookies.get("Authorization") || "";
+
+  const fetchPosts = async () => {
+    const userPosts = await getPostsBySender(token);
+    setUserPosts(userPosts);
+  };
 
   useEffect(() => {
     validateToken();
   }, [navigate]);
 
   useEffect(() => {
-    getUserDetails();
+    const fetchData = async () => {
+      await getUserDetails();
+      await fetchPosts();
+    };
+    fetchData();
   }, []);
 
   const validateToken = () => {
@@ -54,7 +75,12 @@ export default function ProfilePage() {
   const getUserDetails = async () => {
     const currentUser = await getUser(token);
     const { username, email, password, profilePhoto } = currentUser.data;
+    console.log(config.SERVER_URL);
+    console.log(profilePhoto);
+    
     setUser({ username, email, password, profilePhotoUrl: `${config.SERVER_URL}/${profilePhoto}` });
+    console.log(`${config.SERVER_URL}/${profilePhoto}`);
+    
   }
 
   const handleSave = () => {
@@ -62,36 +88,19 @@ export default function ProfilePage() {
       updateUser(token, newUsername, image);
       getUserDetails();
     }
-  }
+  };
 
-  // const handleUpload = async () => {
-  //   if (!image) return alert("Please select an image");
+  const handleDeletePost = async (postId: string) => {
+    await deletePost(postId);
+    await fetchPosts();
+  };
 
-  //   setUploading(true);
-  //   const formData = new FormData();
-  //   formData.append("profileImage", image);
-
-  //   try {
-  //     const response = await axios.post<{ imageUrl: string }>(
-  //       `${config.SERVER_URL}/api/upload`,
-  //       formData,
-  //       {
-  //         headers: { "Content-Type": "multipart/form-data" },
-  //       }
-  //     );
-
-  //     alert("Image uploaded successfully!");
-  //     console.log("Image URL:", response.data.imageUrl);
-  //   } catch (error) {
-  //     console.error("Upload failed", error);
-  //     alert("Upload failed!");
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = userPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   return (
-    <div className="p-6 space-x-8 flex w-full justify-around">
+    <div className="p-6 space-x-8 flex h-fit w-full justify-around">
       <Card className="h-fit w-1/2">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
@@ -116,10 +125,6 @@ export default function ProfilePage() {
                 disabled
               />
             </div>
-            {/* <div>
-              <Label htmlFor="photo">Update Photo:</Label>
-              <Input id="photo" type="file" onChange={handlePhotoUpdate} />
-            </div> */}
 
             <Button className="w-full" onClick={handleSave} disabled={newUsername || image ? false : true}>
               Save Changes
@@ -128,28 +133,57 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Card className="w-1/2">
+      <Card className="w-1/2 h-full">
         <CardHeader>
           <CardTitle>Your Posts</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {userPosts.map((post, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-100 rounded-lg flex items-center flex-col"
-              >
-                <img
-                  src="https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg"
-                  height={200}
-                  width={100}
-                />
-                {post}
+            {currentPosts.map((post) => (
+              <div className="relative" key={post._id}>
+                <Posts setOpenComment={setOpenComment} post={post} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={"secondary"}
+                      className="p-2 absolute top-0 right-0 shadow-none"
+                    >
+                      <MoreVertical size={20} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setOpenEdit(post._id)}>
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDeletePost(post._id)}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ))}
           </div>
+          <Paging
+            posts={userPosts}
+            postsPerPage={postsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </CardContent>
       </Card>
+
+      {openEdit && (
+        <EditPostModal
+          postId={openEdit}
+          setOpen={setOpenEdit}
+          fetchPosts={fetchPosts}
+        />
+      )}
+      {openComment && (
+        <CommentSection postId={openComment} setOpen={setOpenComment} />
+      )}
     </div>
   );
 }
