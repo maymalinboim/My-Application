@@ -10,10 +10,10 @@ export interface Post {
 }
 
 export default function Posts({
-  setOpenPostId,
+  setOpenComment,
   post,
 }: {
-  setOpenPostId: (postId: string | null) => void;
+  setOpenComment: (postId: string | null) => void;
   post: Post;
 }) {
   return (
@@ -41,7 +41,7 @@ export default function Posts({
         </div>
         <div
           className="flex items-center space-x-1 cursor-pointer"
-          onClick={() => setOpenPostId(post._id)}
+          onClick={() => setOpenComment(post._id)}
         >
           <MessageCircle className="w-5 h-5 text-blue-500" />
           <span>{post.comments.length}</span>
