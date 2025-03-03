@@ -1,7 +1,7 @@
+import mongoose from "mongoose";
 import express, { Request, Response } from "express";
 import { Post, User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import jwt from "jsonwebtoken";
 import { IPost, IUser } from "../models/models";
 import { getAccessToken, verifyAccessToken } from "../handlers/authUtils";
 import upload from "../handlers/uploadUtils";
@@ -79,7 +79,8 @@ router.post("/", upload.single("image"), async (req: Request, res: Response) => 
     user.posts.push(newPost._id);
     await user.save();
 
-    res.status(201).send(newPost);
+    const found = await Post.findById(newPost._id).populate("author");
+    res.status(201).send(found);
   } catch (error) {
     console.error("Error creating post:", error);
     res
@@ -284,7 +285,7 @@ router.put("/:id", upload.single("image"), async (req: Request, res: Response) =
 
     if (title) updatedPost.title = title;
     if (body) updatedPost.body = body;
-    if (image) updatedPost.image = image;
+    if (req.file) updatedPost.image = image;
 
     const post = await Post.findById(id).populate("author");
     const postToUpdate = post as unknown as IPost & { author: IUser };
@@ -377,6 +378,82 @@ router.delete("/:id", async (req: Request, res: Response) => {
     res
       .status(500)
       .send({ error: "An error occurred while deleting the post" });
+  }
+});
+
+// ADD LIKE TO POST
+router.post("/like", async (req: Request, res: Response) => {
+  try {
+    const { postId }: { postId: string } = req.body;
+
+    if (!postId) {
+      res.status(400).send({ error: "Please provide postId" });
+      return;
+    }
+
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    const update = { $push: { likes: user } };
+    const updatedPost = await Post.findByIdAndUpdate(postId, update, {
+      new: true,
+    });
+
+    if (!updatedPost) {
+      res.status(404).send({ error: "Post not found" });
+      return;
+    }
+
+    res.status(201).send(updatedPost);
+  } catch (error) {
+    console.error("Error adding like:", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while adding the like" });
+  }
+});
+
+// DELETE LIKE FROM POST
+router.delete("/like/:id", async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.id;
+
+    if (!postId) {
+      res.status(400).send({ error: "Please provide postId" });
+      return;
+    }
+
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    const update = { $pull: { likes: new mongoose.Types.ObjectId(userId) } };
+    const updatedPost = await Post.findByIdAndUpdate(postId, update, {
+      new: true,
+    });
+    
+    if (!updatedPost) {
+      res.status(404).send({ error: "Post not found" });
+      return;
+    }
+
+    res.status(201).send(updatedPost);
+  } catch (error) {
+    console.error("Error adding like:", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while adding the like" });
   }
 });
 

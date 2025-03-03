@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import config from "@/config";
 
 interface UploadProfileProps {
   username: string;
@@ -19,7 +20,6 @@ const UploadProfile: React.FC<UploadProfileProps> = ({ username, setImage, image
     }
   };
 
-
   return (
     <div style={{ textAlign: "center" }}>
       <div onClick={() => fileInputRef.current?.click()} style={{ cursor: "pointer" }}>
@@ -29,7 +29,7 @@ const UploadProfile: React.FC<UploadProfileProps> = ({ username, setImage, image
           ) : (
             imageUrl ? (
               <>
-                <AvatarImage src={imageUrl} />
+                <AvatarImage src={`${config.SERVER_URL}/${imageUrl}`} />
               </>
             ) :
               <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>

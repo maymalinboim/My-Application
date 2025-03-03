@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllPosts } from "@/actions/postsActions";
-import Posts, { Post } from "@/components/Posts";
+import { getAllPosts, getPostsById } from "@/actions/postsActions";
+import Posts from "@/components/Posts";
 import CommentSection from "@/components/Comments";
 import CreatePostModal from "@/components/CreatePost";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Paging from "@/components/Paging";
+import { Post } from "@/models/postModel";
 
 export default function HomePage() {
   const [openComment, setOpenComment] = useState<string | null>(null);
@@ -30,6 +31,14 @@ export default function HomePage() {
     };
     fetchPosts();
   }, []);
+
+  const fetchAndUpdatePost = async (postId: string) => {
+    const updatedPost = await getPostsById(postId);
+
+    setAllPosts((prev) =>
+      prev.map((post) => (post._id === postId ? updatedPost : post))
+    );
+  };
 
   const validateToken = () => {
     const token = Cookies.get("Authorization") || "";
@@ -61,6 +70,7 @@ export default function HomePage() {
                 key={post._id}
                 setOpenComment={setOpenComment}
                 post={post}
+                fetchAndUpdatePost={fetchAndUpdatePost}
               />
             ))}
           </div>
@@ -87,7 +97,7 @@ export default function HomePage() {
       />
 
       {openComment && (
-        <CommentSection postId={openComment} setOpen={setOpenComment} />
+        <CommentSection postId={openComment} setOpen={setOpenComment} fetchAndUpdatePost={fetchAndUpdatePost} />
       )}
     </div>
   );

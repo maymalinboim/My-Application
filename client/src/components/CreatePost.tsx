@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,10 @@ export default function CreatePostModal({
     setLoading(false);
     onCreate(newPost);
     setOpen(false);
+    setPostDetails({
+      title: "",
+      body: "",
+    });
   };
 
   return (
