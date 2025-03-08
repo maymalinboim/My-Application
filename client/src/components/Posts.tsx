@@ -39,42 +39,38 @@ export default function Posts({
   }
 
   return (
-    <div
-      key={post._id}
-      className="p-4 bg-gray-100 rounded-lg flex items-center flex-col"
-    >
-      <h2 className="text-lg font-bold">{post.title}</h2>
+    <div key={post._id} className="w-lg bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between">
       {
         post.image && (
-          <img
-            src={`${config.SERVER_URL}/${post.image}`}
-            height={200}
-            width={100}
-            className="rounded-lg"
-          />
+          <img className="rounded-t-lg" src={`${config.SERVER_URL}/${post.image}`} alt="" width={500} height={250} />
         )
       }
-      <p className="text-gray-700">{post.body}</p>
-      <p className="text-sm text-gray-500">By {post.author.username}</p>
-      <div className="flex items-center space-x-4 mt-2">
-        <div
-          className="flex items-center space-x-1 cursor-pointer"
-          onClick={onLikeClicked}
-        >
-          {
-            liked ?
-              <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
-              :
-              <Heart className="w-5 h-5 text-red-500" />
-          }
-          <span>{post.likes.length}</span>
+      <div className="flex flex-col flex-grow p-6 pt-2">
+        <div className="flex-grow">
+          <h3 className="text-lg font-bold text-left">{post.title}</h3>
+          <p className="text-gray-700 text-left">{post.body}</p>
+          <p className="text-sm text-gray-500 text-left">By {post.author.username}</p>
         </div>
-        <div
-          className="flex items-center space-x-1 cursor-pointer"
-          onClick={() => setOpenComment(post._id)}
-        >
-          <MessageCircle className="w-5 h-5 text-blue-500" />
-          <span>{post?.comments.length}</span>
+        <div className="flex items-center space-x-4 mt-2">
+          <div
+            className="flex items-center space-x-1 cursor-pointer"
+            onClick={onLikeClicked}
+          >
+            {
+              liked ?
+                <Heart className="w-5 h-5 text-red-400" fill="currentColor" />
+                :
+                <Heart className="w-5 h-5 text-red-400" />
+            }
+            <span>{post.likes.length}</span>
+          </div>
+          <div
+            className="flex items-center space-x-1 cursor-pointer"
+            onClick={() => setOpenComment(post._id)}
+          >
+            <MessageCircle className="w-5 h-5 text-blue-600" />
+            <span>{post?.comments.length}</span>
+          </div>
         </div>
       </div>
     </div>
