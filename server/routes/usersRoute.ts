@@ -334,7 +334,7 @@ router.put("/:id", upload.single("profileImage"), async (req: Request, res: Resp
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;
     }
-    if (profilePhoto) updateData.profilePhoto = profilePhoto;
+    if (req.file) updateData.profilePhoto = profilePhoto;
 
     const userToUpdate = await User.findOne({ _id: id });
 

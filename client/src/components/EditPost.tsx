@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { editPost, getPostsById } from "@/actions/postsActions";
 import { NewPost } from "./CreatePost";
+import UploadImage from "./UploadImage";
 
 export default function EditPostModal({
   postId,
@@ -25,12 +26,13 @@ export default function EditPostModal({
     body: "",
   });
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchPostDetails = async () => {
       const post = await getPostsById(postId);
-      const { title, body } = post;
-      setPostDetails({ title, body });
+      const { title, body, image } = post;
+      setPostDetails({ title, body, image });
     };
     fetchPostDetails();
   }, []);
@@ -39,17 +41,10 @@ export default function EditPostModal({
     const { title, body } = postDetails;
 
     setLoading(true);
-    await editPost(postId, title, body);
+    await editPost(postId, title, body, image);
     await fetchPosts();
     setLoading(false);
     setOpen(null);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPostDetails({ ...postDetails, image: URL.createObjectURL(file) });
-    }
   };
 
   return (
@@ -75,15 +70,7 @@ export default function EditPostModal({
           }
         />
 
-        <Input type="file" accept="image/*" onChange={handleImageUpload} />
-
-        {postDetails.image && (
-          <img
-            src={postDetails.image}
-            alt="Preview"
-            className="w-fit h-40 object-cover rounded-lg mt-2"
-          />
-        )}
+        <UploadImage setImage={setImage} imageUrl={postDetails.image}/>
 
         <Button onClick={handleSubmit} disabled={loading}>
           {loading ? "Updating..." : "Edit Post"}

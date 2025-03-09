@@ -44,7 +44,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="text-black">
+                    <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -54,7 +54,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={async () => await handleLogout()}
-                  className="text-black hover:border-none"
+                  className="hover:border-none"
                 >
                   <LogOut />
                   <span>Logout</span>

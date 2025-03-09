@@ -6,7 +6,7 @@ export const getAllPosts = async () => {
   const res = await axios.get(`${config.SERVER_URL}/posts`, {
     withCredentials: true,
   });
-
+  
   return res.data;
 };
 
@@ -28,31 +28,37 @@ export const getPostsById = async (postId: string) => {
   return res.data;
 };
 
-export const createPost = async (title: string, body: string) => {
+export const createPost = async (title: string, body: string, image: File | null) => {
+  const formData = new FormData();
+  image && formData.append("image", image);
+  formData.append("title", title);
+  formData.append("body", body);
+
   const res = await axios.post(
     `${config.SERVER_URL}/posts`,
+    formData,
     {
-      title,
-      body,
-    },
-    {
+      headers: { "Content-Type": "multipart/form-data" },
       withCredentials: true,
-    }
+    },
   );
 
   return res.data;
 };
 
-export const editPost = async (postId: string, title: string, body: string) => {
+export const editPost = async (postId: string, title: string, body: string, image: File | null) => {
+  const formData = new FormData();
+  image && formData.append("image", image);
+  formData.append("title", title);
+  formData.append("body", body);
+
   const res = await axios.put(
     `${config.SERVER_URL}/posts/${postId}`,
+    formData,
     {
-      title,
-      body,
-    },
-    {
+      headers: { "Content-Type": "multipart/form-data" },
       withCredentials: true,
-    }
+    },
   );
 
   return res.data;
@@ -84,6 +90,31 @@ export const addCommentToPost = async (postId: string, comment: string) => {
       body: comment,
       postId,
     },
+    {
+      withCredentials: true,
+    }
+  );
+
+  return res.status === 201;
+};
+
+export const addLikeToPost = async (postId: string) => {
+  const res = await axios.post(
+    `${config.SERVER_URL}/posts/like`,
+    {
+      postId,
+    },
+    {
+      withCredentials: true,
+    }
+  );
+
+  return res.status === 201;
+};
+
+export const deleteLikeFromPost = async (postId: string) => {
+  const res = await axios.delete(
+    `${config.SERVER_URL}/posts/like/${postId}`,
     {
       withCredentials: true,
     }

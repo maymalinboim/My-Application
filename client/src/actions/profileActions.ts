@@ -1,4 +1,5 @@
 import config from "@/config";
+import { User } from "@/models/userModel";
 import { decodeToken } from "@/utils/authUtils";
 import axios from "axios";
 
@@ -28,4 +29,12 @@ export const updateUser = async (token: string, username: string, profilePhoto: 
   );
 
   return res.status === 201;
+};
+
+export const getAllUsersNames = async () => {
+  const res = await axios.get(`${config.SERVER_URL}/users`, {
+    withCredentials: true,
+  });
+  
+  return res.data.map((user: User) => user.username);
 };

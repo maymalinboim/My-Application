@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let uploadPath = "images/";
+        console.log(req.baseUrl);
+        
         
         if (req.baseUrl.includes("users")) {
             uploadPath = "images/users/";
