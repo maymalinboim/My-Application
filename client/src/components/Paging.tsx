@@ -16,7 +16,7 @@ export default function Paging({
   setCurrentPage: (currentPage: number) => void;
 }) {
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= Infinity) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
