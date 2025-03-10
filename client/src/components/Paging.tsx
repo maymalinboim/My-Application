@@ -5,21 +5,16 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
-import { Post } from "./Posts";
 
 export default function Paging({
-  posts,
-  postsPerPage,
+  totalPages,
   currentPage,
   setCurrentPage,
 }: {
-  posts: Post[];
-  postsPerPage: number;
+  totalPages: number;
   currentPage: number;
   setCurrentPage: (currentPage: number) => void;
 }) {
-  const totalPages = Math.ceil(posts.length / postsPerPage);
-
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
