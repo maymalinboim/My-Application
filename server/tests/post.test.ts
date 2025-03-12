@@ -1,17 +1,18 @@
 import request from "supertest";
 import appPromise from "../app";
-import { User } from "../models/models";
+import { Post } from "../models/models";
 import mongoose from "mongoose";
 import { Express } from "express";
 import { verifyAccessToken } from "../handlers/authUtils";
 
-describe("User API tests", () => {
+describe("Post API tests", () => {
   var app: Express;
   let authToken: string;
+  let postId: string;
 
   beforeAll(async () => {
     app = await appPromise;
-    await User.deleteMany();
+    await Post.deleteMany();
   });
 
   afterAll((done) => {
@@ -19,75 +20,71 @@ describe("User API tests", () => {
     done();
   });
 
-  test("Register user", async () => {
+  test("Create post", async () => {
     const userDemo = {
-      username: "test",
-      email: "test@gmail.com",
-      password: "test123",
+      username: "testPost",
+      email: "testPost@gmail.com",
+      password: "testPost123",
       profilePhoto: "images/dog-8198719_640.jpg",
     };
-    const response = await request(app)
+    const registerResponse = await request(app)
       .post("/users/register")
       .send(userDemo)
       .set("Content-Type", "application/json");
-    authToken = response.body.accessToken;
-    expect(response.statusCode).toEqual(201);
-  });
+    authToken = registerResponse.body.accessToken;
 
-  test("Logout user", async () => {
-    const response = await request(app)
-      .post("/users/logout")
-      .set("Cookie", [`Authorization=Bearer ${authToken}`]);
-    expect(response.statusCode).toEqual(200);
-  });
-
-  test("Login user", async () => {
-    const userDemo = {
-      username: "test",
-      password: "test123",
+    const postDemo = {
+      title: "Test post",
+      body: "post!",
     };
     const response = await request(app)
-      .post("/users/login")
-      .send(userDemo)
+      .post("/posts")
+      .send(postDemo)
+      .set("Cookie", [`Authorization=Bearer ${authToken}`])
       .set("Content-Type", "application/json");
-    authToken = response.body.accessToken;
     expect(response.statusCode).toEqual(201);
   });
 
-  test("Get all users", async () => {
+  test("Get all posts", async () => {
     const response = await request(app)
-      .get("/users")
+      .get("/posts")
       .set("Cookie", [`Authorization=Bearer ${authToken}`]);
     expect(response.statusCode).toEqual(200);
   });
 
-  test("Get user by id", async () => {
+  test("Get post by author", async () => {
     const decodedToken = verifyAccessToken(authToken);
     const response = await request(app)
-      .get(`/users/${decodedToken?.userId}`)
+      .get(`/posts/sender/${decodedToken?.userId}`)
+      .set("Cookie", [`Authorization=Bearer ${authToken}`]);
+    postId = response.body[0]._id;
+    expect(response.statusCode).toEqual(200);
+  });
+
+  test("Get post by id", async () => {
+    const response = await request(app)
+      .get(`/posts/${postId}`)
       .set("Cookie", [`Authorization=Bearer ${authToken}`]);
     expect(response.statusCode).toEqual(200);
   });
 
-  test("Update user by id", async () => {
+  test("Update post by id", async () => {
     const decodedToken = verifyAccessToken(authToken);
-    const updatedUser = {
-      username: "test2",
-      email: "test2@gmail.com",
-      password: "test123",
+    const updatedPost = {
+      title: "Test post update",
+      body: "post update!",
     };
     const response = await request(app)
-      .put(`/users/${decodedToken?.userId}`)
-      .send(updatedUser)
+      .put(`/posts/${postId}`)
+      .send(updatedPost)
       .set("Content-Type", "application/json")
       .set("Cookie", [`Authorization=Bearer ${authToken}`]);
     expect(response.statusCode).toEqual(200);
   });
 
-  test("Delete user by id", async () => {
-    const decodedToken = verifyAccessToken(authToken);
+  test("Delete post by id", async () => {
     const response = await request(app)
-      .delete(`/users/${decodedToken?.userId}`)
+      .delete(`/posts/${postId}`)
       .set("Cookie", [`Authorization=Bearer ${authToken}`]);
     expect(response.statusCode).toEqual(200);
   });

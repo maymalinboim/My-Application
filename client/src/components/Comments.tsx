@@ -7,19 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getCommentsByPost, addCommentToPost, getPostsById } from "@/actions/postsActions";
+import { getCommentsByPost, addCommentToPost } from "@/actions/postsActions";
 import { Comment } from "@/models/commentModel";
 
 export default function CommentSection({
   postId,
   setOpen,
   fetchAndUpdatePost,
-}:
-  {
-    postId: string;
-    setOpen: (state: string | null) => void;
-    fetchAndUpdatePost: (postId: string) => void;
-  }) {
+}: {
+  postId: string;
+  setOpen: (state: string | null) => void;
+  fetchAndUpdatePost: (postId: string) => void;
+}) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

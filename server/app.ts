@@ -50,14 +50,13 @@ const promise: Promise<Express> = new Promise((resolve, reject) => {
     .connect(process.env.DATABASE_URL as string, {})
     .then(() => {
       console.log("Connected to MongoDB");
-      resolve(app); // ✅ Now resolving the promise when DB is connected
+      resolve(app);
     })
     .catch((error) => {
       console.error("Initial connection error", error);
-      reject(error); // ✅ Reject if connection fails
+      reject(error);
     });
 
-  // Handle MongoDB events
   const db = mongoose.connection;
   db.on("error", (error) => console.error("MongoDB connection error:", error));
   db.once("open", () => console.log("MongoDB connection established"));

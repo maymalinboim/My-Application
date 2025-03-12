@@ -41,7 +41,7 @@ export default function Posts({
   return (
     <div
       key={post._id}
-      className="w-lg bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
+      className="w-lg min-w-[400px] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
     >
       {post.image && (
         <img
