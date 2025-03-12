@@ -41,7 +41,7 @@ export default function Posts({
   return (
     <div
       key={post._id}
-      className="w-lg bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
+      className="w-lg min-w-[400px] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
     >
       {post.image && (
         <img
@@ -57,7 +57,7 @@ export default function Posts({
           <h3 className="text-lg font-bold text-left">{post.title}</h3>
           <p className="text-gray-700 text-left">{post.body}</p>
           <p className="text-sm text-gray-500 text-left">
-            By {post.author.username}
+            By {post.author?.username}
           </p>
         </div>
         <div className="flex items-center space-x-4 mt-2">

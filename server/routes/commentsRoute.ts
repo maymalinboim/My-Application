@@ -1,8 +1,7 @@
 import express, { Request, Response } from "express";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { Post, User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import jwt from "jsonwebtoken";
 import { getAccessToken, verifyAccessToken } from "../handlers/authUtils";
 
 const router = express.Router();

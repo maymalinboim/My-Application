@@ -12,6 +12,7 @@ import Paging from "@/components/Paging";
 import { Post } from "@/models/postModel";
 import { getPostFromRestApi } from "@/actions/restPhotos";
 import BasicPost from "@/components/BasicPost";
+import config from "@/config";
 
 export default function HomePage() {
   const [openComment, setOpenComment] = useState<string | null>(null);
@@ -40,7 +41,6 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchGeneratedPhotos = async () => {
-      if (dbPosts.length === 0) return;
       setIsLoading(true);
       const perPage = Math.max(
         0,
@@ -73,6 +73,7 @@ export default function HomePage() {
   const handleCreatePost = (newPost: Post) => {
     setDbPosts([newPost, ...dbPosts]);
     setOpenCreate(false);
+    window.location.href = `${config.CLIENT_URL}/home`;
   };
 
   const indexOfLastPost = currentPage * postsPerPage;
