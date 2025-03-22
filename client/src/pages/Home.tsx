@@ -83,7 +83,6 @@ export default function HomePage() {
     indexOfFirstPost,
     indexOfLastPost
   );
-  console.log("combined", combinedPosts);
 
   return (
     <div className="flex justify-center">
