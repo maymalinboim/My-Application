@@ -58,6 +58,7 @@ export default function HomePage() {
 
   const fetchAndUpdatePost = async (postId: string) => {
     const updatedPost = await getPostsById(postId);
+    updatedPost.type = "db";
     setDbPosts((prev) =>
       prev.map((post) => (post._id === postId ? updatedPost : post))
     );

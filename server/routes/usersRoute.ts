@@ -76,16 +76,8 @@ router.post("/register", async (req: Request, res: Response) => {
     const accessToken = generateAccessToken({ userId });
     const refreshToken = generateRefreshToken({ userId });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      domain: ".cs.colman.ac.il",
-    });
-    res.cookie("Authorization", `Bearer ${accessToken}`, {
-      httpOnly: true,
-      secure: true,
-      domain: ".cs.colman.ac.il",
-    });
+    res.cookie("refreshToken", refreshToken);
+    res.cookie("Authorization", `Bearer ${accessToken}`);
 
     res.status(201).send({ accessToken });
   } catch (error) {
@@ -152,16 +144,8 @@ router.post("/login", async (req: Request, res: Response) => {
     const accessToken = generateAccessToken({ userId });
     const refreshToken = generateRefreshToken({ userId });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      domain: ".cs.colman.ac.il",
-    });
-    res.cookie("Authorization", `Bearer ${accessToken}`, {
-      httpOnly: true,
-      secure: true,
-      domain: ".cs.colman.ac.il",
-    });
+    res.cookie("refreshToken", refreshToken);
+    res.cookie("Authorization", `Bearer ${accessToken}`);
 
     res.status(201).send({ accessToken });
   } catch (error) {
