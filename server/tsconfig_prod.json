@@ -9,6 +9,6 @@
       "allowJs": true
     },
     "include": ["**/*.ts", "jest.config.js"],
-    "exclude": ["node_modules", "./tests", "ecosystem.config.js"]
+    "exclude": ["node_modules", "./tests"]
   }
   

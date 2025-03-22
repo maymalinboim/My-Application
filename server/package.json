@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node server.ts",
     "test": "jest --detectOpenHandles --coverage --forceExit",
-    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production"
+    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.cjs --env production"
   },
   "keywords": [],
   "author": "",
