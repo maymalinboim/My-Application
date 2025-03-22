@@ -9,7 +9,10 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
+      url:
+        process.env.NODE_ENV === "production"
+          ? "https://193.106.55.235"
+          : "http://localhost:3000",
     },
   ],
 };
