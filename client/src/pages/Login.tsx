@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginUser, registerUser } from "@/actions/authActions";
 import { isTokenValid } from "@/utils/authUtils";
 import { FcGoogle } from "react-icons/fc";
+import config from "@/config";
 
 interface AuthForm {
   username: string;
@@ -56,7 +57,8 @@ export default function AuthPage() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/auth/google";
+    // window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = `${config.SERVER_URL}/auth/google`;
   };
 
   const errorClass = "text-red-500 text-xs w-fit ml-1 mt-1";
