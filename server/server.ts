@@ -19,4 +19,7 @@ appPromise.then((app: Express) => {
     };
     https.createServer(options, app).listen(process.env.HTTPS_PORT);
   }
+  app.get("/", (req, res) => {
+    res.send("Trip Pix server running!! 🚀");
+  });
 });
