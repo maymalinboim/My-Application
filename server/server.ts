@@ -17,6 +17,6 @@ appPromise.then((app: Express) => {
       key: fs.readFileSync("./client-key.pem"),
       cert: fs.readFileSync("./client-cert.pem")
     };
-    https.createServer(options, app).listen(PORT);
+    https.createServer(options, app).listen(process.env.HTTPS_PORT);
   }
 });
