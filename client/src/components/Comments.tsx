@@ -8,20 +8,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getCommentsByPost, addCommentToPost } from "@/actions/postsActions";
-
-export interface Comment {
-  _id: string;
-  body: string;
-}
+import { Comment } from "@/models/commentModel";
 
 export default function CommentSection({
   postId,
   setOpen,
-}: // onAdd,
-{
+  fetchAndUpdatePost,
+}: {
   postId: string;
   setOpen: (state: string | null) => void;
-  // onAdd: (updatedComments: Comment[]) => void;
+  fetchAndUpdatePost: (postId: string) => void;
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
@@ -43,6 +39,7 @@ export default function CommentSection({
     setLoading(true);
     try {
       await addCommentToPost(postId, newComment);
+      await fetchAndUpdatePost(postId);
       setNewComment("");
 
       const updatedComments = await getCommentsByPost(postId);
@@ -64,7 +61,7 @@ export default function CommentSection({
         <div className="space-y-2">
           {comments.map((comment) => (
             <div key={comment._id} className="border-b pb-2">
-              <strong>{comment._id}:</strong> {comment.body}
+              <strong>{comment.user.username}:</strong> {comment.body}
             </div>
           ))}
         </div>

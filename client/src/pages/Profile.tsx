@@ -2,15 +2,22 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadProfile from "@/components/ui/upload";
+import UploadProfile from "@/components/UploadProfile";
 import { Label } from "@/components/ui/label";
-import { getUser, updateUser } from "@/actions/profileActions";
+import {
+  getUser,
+  updateUser,
+  getAllUsersNames,
+} from "@/actions/profileActions";
 import Cookies from "js-cookie";
 import { isTokenValid } from "@/utils/authUtils";
 import { useNavigate } from "react-router-dom";
-import config from "@/config";
-import { deletePost, getPostsBySender } from "@/actions/postsActions";
-import Posts, { Post } from "@/components/Posts";
+import {
+  deletePost,
+  getPostsById,
+  getPostsBySender,
+} from "@/actions/postsActions";
+import Posts from "@/components/Posts";
 import CommentSection from "@/components/Comments";
 import Paging from "@/components/Paging";
 import {
@@ -21,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import EditPostModal from "@/components/EditPost";
+import { Post } from "@/models/postModel";
 
 interface User {
   username: string;
@@ -45,6 +53,7 @@ export default function ProfilePage() {
   const [openComment, setOpenComment] = useState<string | null>(null);
   const [openEdit, setOpenEdit] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [allUsernames, setAllUsernames] = useState<string[]>([]);
 
   const postsPerPage = 5;
   const token = Cookies.get("Authorization") || "";
@@ -62,6 +71,10 @@ export default function ProfilePage() {
     const fetchData = async () => {
       await getUserDetails();
       await fetchPosts();
+      const allUsers = await getAllUsersNames();
+      setAllUsernames(
+        allUsers.filter((name: string) => name !== user.username)
+      );
     };
     fetchData();
   }, []);
@@ -75,13 +88,16 @@ export default function ProfilePage() {
   const getUserDetails = async () => {
     const currentUser = await getUser(token);
     const { username, email, password, profilePhoto } = currentUser.data;
-    console.log(config.SERVER_URL);
-    console.log(profilePhoto);
-    
-    setUser({ username, email, password, profilePhotoUrl: `${config.SERVER_URL}/${profilePhoto}` });
-    console.log(`${config.SERVER_URL}/${profilePhoto}`);
-    
-  }
+    setUser({ username, email, password, profilePhotoUrl: profilePhoto });
+  };
+
+  const fetchAndUpdatePost = async (postId: string) => {
+    const updatedPost = await getPostsById(postId);
+
+    setUserPosts((prev) =>
+      prev.map((post) => (post._id === postId ? updatedPost : post))
+    );
+  };
 
   const handleSave = () => {
     if (newUsername || image) {
@@ -106,7 +122,11 @@ export default function ProfilePage() {
           <CardTitle>Profile</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-3 justify-around">
-          <UploadProfile username={user.username} setImage={setImage} imageUrl={user.profilePhotoUrl} />
+          <UploadProfile
+            username={user.username}
+            setImage={setImage}
+            imageUrl={user.profilePhotoUrl}
+          />
           <div className="space-y-4 w-1/2">
             <div>
               <Label htmlFor="username">Username</Label>
@@ -116,17 +136,27 @@ export default function ProfilePage() {
                 placeholder={user.username}
                 onChange={(e) => setNewUsername(e.target.value)}
               />
+              {allUsernames.includes(newUsername) &&
+                !(newUsername === user.username) && (
+                  <p className="text-red-500 text-xs w-fit ml-1 mt-1">
+                    Username is taken
+                  </p>
+                )}
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={user.email}
-                disabled
-              />
+              <Input id="email" value={user.email} disabled />
             </div>
 
-            <Button className="w-full" onClick={handleSave} disabled={newUsername || image ? false : true}>
+            <Button
+              className="w-full"
+              onClick={handleSave}
+              disabled={
+                (!newUsername && !image) ||
+                (allUsernames.includes(newUsername) &&
+                  !(newUsername === user.username))
+              }
+            >
               Save Changes
             </Button>
           </div>
@@ -141,7 +171,11 @@ export default function ProfilePage() {
           <div className="space-y-4">
             {currentPosts.map((post) => (
               <div className="relative" key={post._id}>
-                <Posts setOpenComment={setOpenComment} post={post} />
+                <Posts
+                  setOpenComment={setOpenComment}
+                  post={post}
+                  fetchAndUpdatePost={fetchAndUpdatePost}
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -166,8 +200,7 @@ export default function ProfilePage() {
             ))}
           </div>
           <Paging
-            posts={userPosts}
-            postsPerPage={postsPerPage}
+            totalPages={Math.ceil(userPosts.length / postsPerPage)}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
           />
@@ -182,7 +215,11 @@ export default function ProfilePage() {
         />
       )}
       {openComment && (
-        <CommentSection postId={openComment} setOpen={setOpenComment} />
+        <CommentSection
+          postId={openComment}
+          setOpen={setOpenComment}
+          fetchAndUpdatePost={fetchAndUpdatePost}
+        />
       )}
     </div>
   );

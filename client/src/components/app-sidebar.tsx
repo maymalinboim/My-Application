@@ -38,13 +38,13 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>My Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Trip Pix</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="text-black">
+                    <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -54,7 +54,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={async () => await handleLogout()}
-                  className="text-black hover:border-none"
+                  className="hover:border-none"
                 >
                   <LogOut />
                   <span>Logout</span>

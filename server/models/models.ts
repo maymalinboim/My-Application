@@ -16,7 +16,8 @@ const userSchema = new Schema<IUser>({
   posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
 });
 
-export const User = mongoose.model<IUser>("User", userSchema);
+export const User =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
 export interface IPost extends Document {
   title: string;
@@ -56,4 +57,5 @@ const postSchema = new Schema<IPost>({
   },
 });
 
-export const Post = mongoose.model<IPost>("Post", postSchema);
+export const Post =
+  mongoose.models.Post || mongoose.model<IPost>("Post", postSchema);

@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import express, { Request, Response } from "express";
 import { Post, User } from "../db/dbUtils";
 import authMiddleware from "../handlers/auth";
-import jwt from "jsonwebtoken";
 import { IPost, IUser } from "../models/models";
 import { getAccessToken, verifyAccessToken } from "../handlers/authUtils";
+import upload from "../handlers/uploadUtils";
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -11,6 +12,7 @@ router.use(authMiddleware);
 interface PostRequestBody {
   title: string;
   body: string;
+  image: string;
 }
 
 /**
@@ -46,9 +48,11 @@ interface PostRequestBody {
  *         description: Error occurred during creation.
  */
 // CREATE NEW POST
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", upload.single("image"), async (req: Request, res: Response) => {
   try {
     const { title, body }: PostRequestBody = req.body;
+    const image = req.file ? `${req.file?.destination}${req.file?.filename}` : undefined;
+
     if (!title || !body) {
       res.status(400).send({ error: "Please provide title and body" });
       return;
@@ -67,6 +71,7 @@ router.post("/", async (req: Request, res: Response) => {
       title,
       body,
       author: userId,
+      image
     });
 
     await newPost.save();
@@ -74,7 +79,8 @@ router.post("/", async (req: Request, res: Response) => {
     user.posts.push(newPost._id);
     await user.save();
 
-    res.status(201).send(newPost);
+    const found = await Post.findById(newPost._id).populate("author");
+    res.status(201).send(found);
   } catch (error) {
     console.error("Error creating post:", error);
     res
@@ -111,7 +117,7 @@ router.post("/", async (req: Request, res: Response) => {
 // GET ALL POSTS
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const allPosts = await Post.find();
+    const allPosts = await Post.find().populate("author").sort({ createdAt: -1 });
     res.status(200).send(allPosts);
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -167,7 +173,7 @@ router.get("/sender/:sender", async (req: Request, res: Response) => {
       res.status(400).send({ error: "Please provide sender id" });
       return;
     }
-    const senderPosts = await Post.find({ author: sender }).populate("author");
+    const senderPosts = await Post.find({ author: sender }).populate("author").sort({ createdAt: -1 });;
     if (!senderPosts.length) {
       res.status(404).send({ error: "No posts found for this sender" });
       return;
@@ -263,10 +269,11 @@ router.get("/:id", async (req: Request, res: Response) => {
  *         description: Error occurred during update.
  */
 // UPDATE POST BY ID
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", upload.single("image"), async (req: Request, res: Response) => {
   try {
     const updatedPost: Partial<PostRequestBody> = {};
     const { title, body } = req.body;
+    const image = `${req.file?.destination}${req.file?.filename}`;
     const id = req.params.id;
 
     if (!title || !body || !id) {
@@ -278,6 +285,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 
     if (title) updatedPost.title = title;
     if (body) updatedPost.body = body;
+    if (req.file) updatedPost.image = image;
 
     const post = await Post.findById(id).populate("author");
     const postToUpdate = post as unknown as IPost & { author: IUser };
@@ -370,6 +378,82 @@ router.delete("/:id", async (req: Request, res: Response) => {
     res
       .status(500)
       .send({ error: "An error occurred while deleting the post" });
+  }
+});
+
+// ADD LIKE TO POST
+router.post("/like", async (req: Request, res: Response) => {
+  try {
+    const { postId }: { postId: string } = req.body;
+
+    if (!postId) {
+      res.status(400).send({ error: "Please provide postId" });
+      return;
+    }
+
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    const update = { $push: { likes: user } };
+    const updatedPost = await Post.findByIdAndUpdate(postId, update, {
+      new: true,
+    });
+
+    if (!updatedPost) {
+      res.status(404).send({ error: "Post not found" });
+      return;
+    }
+
+    res.status(201).send(updatedPost);
+  } catch (error) {
+    console.error("Error adding like:", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while adding the like" });
+  }
+});
+
+// DELETE LIKE FROM POST
+router.delete("/like/:id", async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.id;
+
+    if (!postId) {
+      res.status(400).send({ error: "Please provide postId" });
+      return;
+    }
+
+    const token = getAccessToken(req) || "";
+    const { userId } = verifyAccessToken(token) || { userId: "" };
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).send({ error: "User not found" });
+      return;
+    }
+
+    const update = { $pull: { likes: new mongoose.Types.ObjectId(userId) } };
+    const updatedPost = await Post.findByIdAndUpdate(postId, update, {
+      new: true,
+    });
+    
+    if (!updatedPost) {
+      res.status(404).send({ error: "Post not found" });
+      return;
+    }
+
+    res.status(201).send(updatedPost);
+  } catch (error) {
+    console.error("Error adding like:", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while adding the like" });
   }
 });
 
