@@ -88,7 +88,11 @@ export const auth = (req: Request, res: Response): boolean => {
       const newAccessToken = generateAccessToken({
         userId: refreshDecoded.userId,
       });
-      res.cookie("Authorization", `Bearer ${newAccessToken}`);
+      res.cookie("Authorization", `Bearer ${newAccessToken}`, {
+        httpOnly: true,
+        secure: true,
+        domain: ".cs.colman.ac.il",
+      });
 
       decoded = refreshDecoded;
     }

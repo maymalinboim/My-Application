@@ -76,8 +76,16 @@ router.post("/register", async (req: Request, res: Response) => {
     const accessToken = generateAccessToken({ userId });
     const refreshToken = generateRefreshToken({ userId });
 
-    res.cookie("refreshToken", refreshToken);
-    res.cookie("Authorization", `Bearer ${accessToken}`);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain: ".cs.colman.ac.il",
+    });
+    res.cookie("Authorization", `Bearer ${accessToken}`, {
+      httpOnly: true,
+      secure: true,
+      domain: ".cs.colman.ac.il",
+    });
 
     res.status(201).send({ accessToken });
   } catch (error) {
@@ -144,8 +152,16 @@ router.post("/login", async (req: Request, res: Response) => {
     const accessToken = generateAccessToken({ userId });
     const refreshToken = generateRefreshToken({ userId });
 
-    res.cookie("refreshToken", refreshToken);
-    res.cookie("Authorization", `Bearer ${accessToken}`);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain: ".cs.colman.ac.il",
+    });
+    res.cookie("Authorization", `Bearer ${accessToken}`, {
+      httpOnly: true,
+      secure: true,
+      domain: ".cs.colman.ac.il",
+    });
 
     res.status(201).send({ accessToken });
   } catch (error) {
@@ -313,60 +329,68 @@ router.get("/:id", async (req: Request, res: Response) => {
  *         description: Error occurred during update.
  */
 // UPDATE USER BY ID
-router.put("/:id", upload.single("profileImage"), async (req: Request, res: Response) => {
-  try {
-    const { username, email, password } = req.body;
-    const profilePhoto = `${req.file?.destination}${req.file?.filename}`;
-    const id = req.params.id;
+router.put(
+  "/:id",
+  upload.single("profileImage"),
+  async (req: Request, res: Response) => {
+    try {
+      const { username, email, password } = req.body;
+      const profilePhoto = `${req.file?.destination}${req.file?.filename}`;
+      const id = req.params.id;
 
-    if (!id) {
+      if (!id) {
+        res
+          .status(400)
+          .send({ error: "Please provide user id and update details" });
+        return;
+      }
+
+      const updateData: {
+        username?: string;
+        email?: string;
+        password?: string;
+        profilePhoto?: string;
+      } = {};
+      if (username) updateData.username = username;
+      if (email) updateData.email = email;
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        updateData.password = hashedPassword;
+      }
+      if (req.file) updateData.profilePhoto = profilePhoto;
+
+      const userToUpdate = await User.findOne({ _id: id });
+
+      if (!userToUpdate) {
+        res.status(404).send({ error: "User not found" });
+        return;
+      }
+
+      const token = getAccessToken(req) || "";
+      const { userId } = verifyAccessToken(token) || { userId: "" };
+
+      if (userToUpdate._id.toString() !== userId) {
+        res.status(401).send({ error: "No permission to update this user" });
+        return;
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+      if (!updatedUser) {
+        res.status(404).send({ error: "User not found" });
+        return;
+      }
+
+      res.status(200).send(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
       res
-        .status(400)
-        .send({ error: "Please provide user id and update details" });
-      return;
+        .status(500)
+        .send({ error: "An error occurred while updating the user" });
     }
-
-    const updateData: { username?: string; email?: string; password?: string, profilePhoto?: string } =
-      {};
-    if (username) updateData.username = username;
-    if (email) updateData.email = email;
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updateData.password = hashedPassword;
-    }
-    if (req.file) updateData.profilePhoto = profilePhoto;
-
-    const userToUpdate = await User.findOne({ _id: id });
-
-    if (!userToUpdate) {
-      res.status(404).send({ error: "User not found" });
-      return;
-    }
-
-    const token = getAccessToken(req) || "";
-    const { userId } = verifyAccessToken(token) || { userId: "" };
-
-    if (userToUpdate._id.toString() !== userId) {
-      res.status(401).send({ error: "No permission to update this user" });
-      return;
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
-    if (!updatedUser) {
-      res.status(404).send({ error: "User not found" });
-      return;
-    }
-
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res
-      .status(500)
-      .send({ error: "An error occurred while updating the user" });
   }
-});
+);
 
 /**
  * @swagger
